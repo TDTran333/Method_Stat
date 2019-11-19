@@ -1,5 +1,5 @@
 ---
-title: "Risk Management Project"
+title: "Statistical Methods in Financial Engineering - Risk Management Project"
 author: Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest, Thien Duy Tran
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 output: html_notebook
@@ -38,7 +38,9 @@ pre { /* Code block - determines code spacing between lines */
 }
 </style>
 
-# Context
+# Part I: Project Guidelines
+
+## Context
 You work as a quantitative analyst for a large investment bank. You and your team are responsible for
 challenging the models used by traders and risk managers. You work with R and love reproducible research.
 All your files are written in Rmarkdown or R notebook.
@@ -48,96 +50,109 @@ Moreover, you use GitHub with your team. You’ll build a dedicated project for 
 RStudio with GitHub extensively. You also use Loom to share your findings with other teams in the investment
 bank.
 
-## Learning objectives
-Content (scientific rigor, concepts, creativity)\
-• Choose the right tools.\
-• Implement the steps correctly.\
-• Come up with innovative solutions.\
+## Learning Objectives
+1. Content (scientific rigor, concepts, creativity).\
+2. Choose the right tools.\
+3. Implement the steps correctly.\
+4. Come up with innovative solutions.\
 
-## Form (coding, collaboration, presentation)
-• Build RStudio project with proper folder structure and Rmarkdown/nootebook file to reproduce your results.\
-• Program with state-of-the-art coding standards.\
-• Use GitHub repository for collabortive research.\
-• Use Loom video for presenting your results.
+## Form: Coding, Collaboration and Presentation
+1. Build RStudio project with proper folder structure and Rmarkdown/nootebook file to reproduce your results.\
+2. Program with state-of-the-art coding standards.\
+3. Use GitHub repository for collaborative research.\
+4. Use Loom video for presenting your results.
 
-# Project (Risk management)
-The objective is to implement (part of) the risk management framework for estimating the risk of a book of
-European call options by taking into account the risk drivers such as underlying and implied volatility.
+## Objective
+The objective of this project is to implement the risk management framework used for estimating the risk of a book of European call options by taking into account risk drivers such as the underlying asset and the implied volatility of the options.
 
-## Instructions
+# Part II: Data
 
-## Data
-Load the database Data. Identify the price of the S&P 500, the VIX index, the term structure of
-interest rates (current and past), and the traded options (calls and puts).
+## Loading the Data
+The first step is to load the database 'Market'. 'Market' is a list of 5 elements: S&P500 index prices, VIX values, the term structure of interest rates, and traded call and put options information. To make sure this code can run on any platform, we use the library 'here'.
 
 ```{r}
-# Packages
-
 # install.packages("here")
 library("here")
 
-# load data
+# Load the data
 load(file = here("Data", "Market.rda"))
 
-# load function 
-source(file = here("Functions", "price_call.r")) # function that price Calls with Black-Shcole  formula
-source(file = here("Functions", "lin_inter.r"))  # interpolation lineaire entre les taux d'interet de la courbe d'interet
+# Load the function 
+source(file = here("Functions", "price_call.r")) # Prices calls using the Black-Scholes formula
+source(file = here("Functions", "lin_inter.r"))  # Linear interpolation of the interest rates
 
-# data
+# Assign data to different variables
 vix    <- Market$vix
 sp_500 <- Market$sp500
 rf     <- Market$rf
 calls  <- Market$calls
 puts   <- Market$puts
-
 ```
 
-## Pricing of a portfolio of options
-Assume the following book of European call options: 1x strike K = 1600 maturity 20 days, 1x strike
-K = 1650 maturity 20 days, 1x strike K = 1750 maturity 40 days and 1x strike K = 1800 maturity 40
-days.
+# Part III: Pricing a Portfolio of Options
+
+The portfolio under consideration contains four options: K = 1600 and T-t = 20 days, K = 1650 and T-t = 20 days, K = 1750 and T-t = 40 days, and K = 1800 and T-t = 40 days. We assume that there is 250 days in a year and thus convert times to expiry in years by dividing by 250. We first create a matrix 'book' that contains information regarding the options in the portfolio.
 
 ```{r}
-# Portfolio  Calls - Caracteristics
+# Create matrix
 book <- matrix(data=NA, nrow = 4, ncol = 4)
+
+# Assign names to columns
 colnames(book) <- c("Quantity","Call","StrikePrice","Maturity")
 
-book[1,] <- c(1, 1, 1600, 20 / 365)
-book[2,] <- c(1, 1, 1650, 20 / 365)
-book[3,] <- c(1, 1, 1750, 40 / 365)
-book[4,] <- c(1, 1, 1800, 40 / 365)
+# Store initial values
+book[1,] <- c(1, 1, 1600, 20 / 250)
+book[2,] <- c(1, 1, 1650, 20 / 250)
+book[3,] <- c(1, 1, 1750, 40 / 250)
+book[4,] <- c(1, 1, 1800, 40 / 250)
+```
 
-# input for black-Schole calls pricing 
-# interest rate interpolated
+The next step is to use the most recent underlying asset price and VIX value as well as the interpolated risk-free rates to compute the value of each option in the portfolio that we store in te variable 'call_price'. The value of the portfolio of options is simply the sum of each option's value.
+
+```{r}
+# Interpolated interest rates
 r_1 <- lin_inter(book[1,4])
 r_2 <- lin_inter(book[3,4])
-# Spot price, Volatility, Strike price, Maturity
+
+# Latest underlying asset price (spot price)
 S   <- sp_500[length(sp_500)]
+
+# Latest VIX value
 vol <- vix[length(vix)]
+
+# Strike prices
 K   <- book[,3]
+
+# Maturities
 N   <- book[,4] 
 
-# calculating and Stocking Call's prices
+# Initialize a vector
 call_price <- c(rep(NA, 4))
+
+# Compute the option values and store them in 'call_price'
 call_price[1] <- Price_call(S, K[1], r_1, vol, N[1])
 call_price[2] <- Price_call(S, K[2], r_1, vol, N[2])
 call_price[3] <- Price_call(S, K[3], r_2, vol, N[3])
 call_price[4] <- Price_call(S, K[4], r_2, vol, N[4])
 
-# stocking Portfolio Value
+# Compute the price of the portfolio and store it in 'PF_price'
 PF_price <- sum(call_price)
 ```
 
-Find the price of this book given the latest underlying price and the latest implied volatility (take the
-VIX for all options). Use Black-Scholes formula to price the options. Take the current term structure
-and linearly interpolate to find the corresponding rates. Use 360 days/year for the term structure and
-250 days/year for the time to maturity of the options.
+It is not surprising to see that the value of the first option is higher than the value of the second option. Indeed, since the strike price is lower for the first option, the first option is deeper ITM than the second option and it should therefore have a higher price. The same reasoning can be applied between the third and fourth options.
 
+# Part IV: One Risk Driver and Gaussian Model
+
+We now want to estimate the value-at-risk (VaR) and the expected shortfall (ES) of this portfolio of options over the course of the following week. To do so, we must first compute the underlying asset log returns.
 
 ```{r}
-# log return - sp_500
-log_return <-diff(log(sp_500))
+# Daily log returns
+log_return <- diff(log(sp_500))
+```
 
+Next, we assume that the underlying asset log returns follow a normal distribution and generate 10 000 scenarios for the underlying asset price. The normal distribution parameters can be found by computing the empirical mean and standard deviation of the underlying asset daily log returns. [Je suis rendu là...]
+
+```{r}
 # model calibration
 tmp    <- length(log_return)
 
@@ -199,4 +214,3 @@ abline(v = quantile(pl, probs = (1 - alpha)),
        lwd = 2.5, ## line width: the largher, the thicker
        col = "red")
 ```
-
