@@ -7,11 +7,11 @@ Price_call <- function(S, K, r, vol, M) {
   # parameters using the Black-Scholes (1973) model.
   
   # Compute the quantities 'd_1' and 'd_2'
-  d_1 <- (log(S / K) + (r + vol^2 / 2) * N) / (vol * N^0.5)
-  d_2 <- d_1 - vol * N^0.5
+  d_1 <- (log(S / K) + (r + vol^2 / 2) * M) / (vol * M^0.5)
+  d_2 <- d_1 - vol * M^0.5
   
   # Compute the call option price
-  price <- S * pnorm(d_1) - K * exp(r * N) * pnorm(d_2)
+  price <- S * pnorm(d_1) - K * exp(r * M) * pnorm(d_2)
   
   # Make sure the call options price is larger or equal to zero
   if (price < 0) {

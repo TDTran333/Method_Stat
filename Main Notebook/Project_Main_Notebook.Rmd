@@ -163,7 +163,7 @@ It is not surprising to see that the value of the first option is higher than th
 We now want to estimate the value-at-risk (VaR) and the expected shortfall (ES) of this portfolio of options over the course of the following week. To do so, we must first compute the underlying asset log returns.
 
 ```{r}
-# Daily log returns
+# Daily underlying asset log returns
 log_return <- diff(log(sp_500))
 ```
 
@@ -194,15 +194,15 @@ t <- 5
 # Set seed for generating pseudo-random numbers
 set.seed(4321)
 
-# Store in 'sim_ret' normally distributed IID shocks with mean 'mu_hat' and standard deviation 'sd_hat'
-sim_ret <- matrix(rnorm(t * H, mean = theta_1[1], sd = theta_1[2]), nrow = H, ncol = t)
+# Store in 'sim_ret_1' normally distributed IID shocks with mean 'mu_hat' and standard deviation 'sd_hat'
+sim_ret_1 <- matrix(rnorm(t * H, mean = theta_1[1], sd = theta_1[2]), nrow = H, ncol = t)
 ```
 
 In order to obtain the underlying asset price one week from now, we simply have to compute the exponential sum of the five daily normally distributed IID shocks per trajectory and multiply by the latest underlying asset price. The last thing we need to modify is the risk-free rate for the remaining life of the option. The strike price does not change over the option life and the volatility is assumed to be constant.
 
 ```{r}
 # Compute the price of the underlying asset one week from now
-S_2 <- S_1 * exp(rowSums(sim_ret))
+S_2 <- S_1 * exp(rowSums(sim_ret_1))
 
 # Update the risk-free rate (360-day basis year)
 r_3   <- lin_inter(m_1 - t / 360)
@@ -230,7 +230,7 @@ PF_price_2 <- rowSums(call_price_2)
 r_PL <- lin_inter(t / 360)
 
 # Compute the P&L
-PL   <- PF_price_2 * exp(-(t / 360) * r_PL) - PF_price_1
+PL_1 <- PF_price_2 * exp(-(t / 360) * r_PL) - PF_price_1
 ```
 
 The last step is to compute the VaR and the ES of the portfolio of options P&L distribution. In order to do so, we sort the P&L values in ascending order and identify the (1-alpha)-quartile of the distribution for the VaR, where alpha is the risk level (in our case, 0.95). The ES is simply the mean of the P&L values smaller than the VaR.
@@ -240,14 +240,14 @@ The last step is to compute the VaR and the ES of the portfolio of options P&L d
 alpha <- 0.95
 
 # Compute the VaR and the ES of the P&L distribution
-VaR <- sort(PL)[(1 - alpha) * H]
-ES  <- mean(sort(PL)[1:((1 - alpha) * H)])
+VaR_1 <- sort(PL_1)[(1 - alpha) * H]
+ES_1  <- mean(sort(PL_1)[1:((1 - alpha) * H)])
 
 # Plot an histogram
-hist(PL, nclass = round(10 * log(length(PL))), probability = TRUE)
+hist(PL_1, nclass = round(10 * log(length(PL_1))), probability = TRUE)
 
 # Add a vertical line to show the VaR
-abline(v   = quantile(PL, probs = (1 - alpha)),
+abline(v   = quantile(PL_1, probs = (1 - alpha)),
        lty = 1,
        lwd = 2.5,
        col = "red")
@@ -258,6 +258,72 @@ abline(v   = quantile(PL, probs = (1 - alpha)),
 # Part V: Two risk drivers and Gaussian model
 
 ```{r}
+# install.packages("MASS")
+library("MASS")
 
+# Daily VIX log returns
+vix_return <- diff(log(vix))
 
+# Store underlying asset log returns and VIX log returns in 'rets'
+rets     <- matrix(NA, nrow = n_ret, ncol = 2)
+rets[,1] <- log_return
+rets[,2] <- vix_return
+
+# Calibration
+mu_hat <- colMeans(rets)
+sg_hat <- ((n_ret - 1) / n_ret) * cov(rets)
+
+# Store parameters in 'theta_2'
+theta_2 <- list(mu = mu_hat, sigma = sg_hat)
+
+# Initialize the array 'sim_ret_2'
+sim_ret_2 <- array(data = NA, dim = c(H, 2, t))
+
+# Set seed for generating pseudo-random numbers
+set.seed(4321)
+
+# Store in 'sim_ret_2' daily shocks from a multivariate normal distribution with parameters 'theta_2'
+for (i in 1:t) {
+  sim_ret_2[,,i] <- mvrnorm(n = H, mu = theta_2$mu, Sigma = theta_2$sigma)
+}
+
+# Initialize two vectors that contain the underlying asset price and the VIX value one week from now
+S_3   <- rep(NA, H)
+vol_3 <- rep(NA, H)
+
+# Compute the underlying asset price and the VIX value one week from now
+for (i in 1:H) {
+  S_3[i]   <- S_1 * exp(sum(sim_ret_2[i,1,]))
+  vol_3[i] <- vol_1 * exp(sum(sim_ret_2[i,2,]))
+}
+
+# Initialize a matrix to store call prices (10 000 rows (1 per simulation), 4 columns (1 per option))
+call_price_3 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through 10 000 simulations and price each call option
+for (i in 1:10000){
+  call_price_3[i,1] <- Price_call(S_3[i], K[1], r_3, vol_3[i], M[1] - t / 250)
+  call_price_3[i,2] <- Price_call(S_3[i], K[2], r_3, vol_3[i], M[2] - t / 250)
+  call_price_3[i,3] <- Price_call(S_3[i], K[3], r_4, vol_3[i], M[3] - t / 250)
+  call_price_3[i,4] <- Price_call(S_3[i], K[4], r_4, vol_3[i], M[4] - t / 250)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_price_3'
+PF_price_3 <- rowSums(call_price_3)
+
+# Compute the P&L
+PL_2 <- PF_price_3 * exp(-(t / 360) * r_PL) - PF_price_1
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_2 <- sort(PL_2)[(1 - alpha) * H]
+ES_2  <- mean(sort(PL_2)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_2, nclass = round(10 * log(length(PL_2))), probability = TRUE)
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_2, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
 ```
