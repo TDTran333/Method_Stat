@@ -77,7 +77,7 @@ library("here")
 # Load the data
 load(file = here("Data", "Market.rda"))
 
-# Load the function 
+# Load the functions
 source(file = here("Functions", "price_call.r")) # Prices calls using the Black-Scholes formula
 source(file = here("Functions", "lin_inter.r"))  # Linear interpolation of the interest rates
 
@@ -323,6 +323,111 @@ hist(PL_2, nclass = round(10 * log(length(PL_2))), probability = TRUE)
 
 # Add a vertical line to show the VaR
 abline(v   = quantile(PL_2, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
+
+[Discussion on the result (VaR is smaller because the underlying asset and the VIX are negatively correlated; when the value of the underlying asset drops, the volatility tends to rise and offsets the effect of the underlying asset price on the call option price) and the assumption (normal distribution for log returns)]
+
+# Part VI: Two risk drivers and copula-marginal model
+
+```{r}
+# install.packages("copula")
+library("copula")
+
+# install.packages("fGarch")
+library("fGarch")
+
+# Load the function
+source(file = here("Functions", "nll_student.r")) # Computes the negative log-likelihood function
+
+# Define an initial vector of parameters for the underlying asset log returns
+theta_0 <- c(mean(log_return), sd(log_return), 10)
+
+# Calibrate the student-t distribution on the underlying asset log returns
+tmp <- optim(par = theta_0,
+             fn = nll_student,
+             method = "L-BFGS-B",
+             lower = c(-Inf, 1e-5, 10),
+             x = log_return)
+
+# Store parameters in 'theta_3'
+theta_3 <- tmp$par
+
+# Define an initial vector of parameters for the VIX log returns
+theta_0 <- c(mean(vix_return), sd(vix_return), 5)
+
+# Calibrate the student-t distribution on the VIX log returns
+tmp <- optim(par = theta_0,
+             fn = nll_student,
+             method = "L-BFGS-B",
+             lower = c(-Inf, 1e-5, 5),
+             x = vix_return)
+
+# Store parameters in 'theta_3'
+theta_4 <- tmp$par
+
+# Compute 'U_1' and 'U_2' and combine these two variables in 'U'
+U_1 <- pstd(log_return, mean = theta_3[1], sd = theta_3[2], nu = theta_3[3])
+U_2 <- pstd(log_return, mean = theta_4[1], sd = theta_4[2], nu = theta_4[3])
+U   <- cbind(U_1, U_2)
+
+# Calibrate a Gaussian copula
+C   <- normalCopula(dim = 2)
+fit <- fitCopula(C, data = U, method = "ml")
+
+# Set seed for generating pseudo-random numbers
+set.seed(4321)
+
+sim_U          <- rCopula(H * t, fit@copula)
+sim_log_return <- qstd(sim_U[,1], mean = theta_3[1], sd = theta_3[2], nu = theta_3[3])
+sim_vix_return <- qstd(sim_U[,2], mean = theta_4[1], sd = theta_4[2], nu = theta_4[3])
+
+# Initialize the array 'sim_ret_3'
+sim_ret_3 <- array(data = NA, dim = c(H, 2, t))
+
+# Store in 'sim_ret_3' daily log returns for the underlying asset and the VIX
+for (i in 1:t) {
+  sim_ret_3[,,i] <- c(sim_log_return[(H * (i - 1) + 1):(H * i)], sim_vix_return[(H * (i - 1) + 1):(H * i)])
+}
+
+# Initialize two vectors that contain the underlying asset price and the VIX value one week from now
+S_4   <- rep(NA, H)
+vol_4 <- rep(NA, H)
+
+# Compute the underlying asset price and the VIX value one week from now
+for (i in 1:H) {
+  S_4[i]   <- S_1 * exp(sum(sim_ret_3[i,1,]))
+  vol_4[i] <- vol_1 * exp(sum(sim_ret_3[i,2,]))
+}
+
+# Initialize a matrix to store call prices (10 000 rows (1 per simulation), 4 columns (1 per option))
+call_price_4 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through 10 000 simulations and price each call option
+for (i in 1:10000){
+  call_price_4[i,1] <- Price_call(S_4[i], K[1], r_3, vol_4[i], M[1] - t / 250)
+  call_price_4[i,2] <- Price_call(S_4[i], K[2], r_3, vol_4[i], M[2] - t / 250)
+  call_price_4[i,3] <- Price_call(S_4[i], K[3], r_4, vol_4[i], M[3] - t / 250)
+  call_price_4[i,4] <- Price_call(S_4[i], K[4], r_4, vol_4[i], M[4] - t / 250)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_price_4'
+PF_price_4 <- rowSums(call_price_4)
+
+# Compute the P&L
+PL_3 <- PF_price_4 * exp(-(t / 360) * r_PL) - PF_price_1
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_3 <- sort(PL_3)[(1 - alpha) * H]
+ES_3  <- mean(sort(PL_3)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_3, nclass = round(10 * log(length(PL_3))), probability = TRUE)
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_3, probs = (1 - alpha)),
        lty = 1,
        lwd = 2.5,
        col = "red")

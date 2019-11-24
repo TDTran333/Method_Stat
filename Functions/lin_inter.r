@@ -4,7 +4,7 @@ lin_inter <- function(day) {
   # specified in the assignment.
   
   # Loop through the term structure and identify the largest smaller
-  # maturity (lb) and the lowest larger maturity (ub)
+  # maturity (lb) and the lowest larger maturity (ub).
   for (i in 1:nrow(rates)) {
     if (day > rates[i,1]) {
        lb <- i
