@@ -449,7 +449,7 @@ spec   <- ugarchspec(variance.model = list(model = "sGARCH"),
                      include.mean = FALSE))
 
 fit           <- ugarchfit(spec = spec, data = log_return)
-Resid_returns <- fit@fit$rediduals
+Resid_returns <- fit@fit$residuals
 
 # Residuals of the log-returns of the Vix using an AR(1) model 
 ar1_vix   <- arima(vix_return,order = c(1,0,0))
