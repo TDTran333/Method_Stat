@@ -82,10 +82,10 @@ source(file = here("Functions", "price_call.r")) # Prices calls using the Black-
 source(file = here("Functions", "lin_inter.r"))  # Linear interpolation of the interest rates
 
 # Assign data to different variables
-vix       <- Market$vix
-sp_500    <- Market$sp500
-calls     <- Market$calls
-puts      <- Market$puts
+vix       <- as.vector(Market$vix)
+sp_500    <- as.vector(Market$sp500)
+calls     <- as.vector(Market$calls)
+puts      <- as.vector(Market$puts)
 
 # Create a matrix 'rates' with two columns: maturities and risk-free rates
 rates     <- matrix(data = NA, nrow = length(Market$rf), ncol = 2)
@@ -121,7 +121,7 @@ The next step is to use the most recent underlying asset price and VIX value as 
 
 ```{r}
 # Number of observations
-n_obs <- nrow(sp_500)
+n_obs <- length(sp_500)
 
 # Convert 250-day basis year in 360-day basis year
 m_1 <- unique(book_1[,4])[1] * (250 / 360)
@@ -165,6 +165,7 @@ We now want to estimate the value-at-risk (VaR) and the expected shortfall (ES) 
 ```{r}
 # Daily underlying asset log returns
 log_return <- diff(log(sp_500))
+log_return <- log_return[-1]
 ```
 
 Next, we assume that the underlying asset log returns follow a normal distribution. The normal distribution parameters can be found by computing the empirical mean and standard deviation of the underlying asset daily log returns.
@@ -263,6 +264,7 @@ library("MASS")
 
 # Daily VIX log returns
 vix_return <- diff(log(vix))
+vix_return <- vix_return[-1]
 
 # Store underlying asset log returns and VIX log returns in 'rets'
 rets     <- matrix(NA, nrow = n_ret, ncol = 2)
@@ -432,3 +434,9 @@ abline(v   = quantile(PL_3, probs = (1 - alpha)),
        lwd = 2.5,
        col = "red")
 ```
+# Part VII: Volatility Surface
+
+
+
+
+# Part VIII: Full approach
