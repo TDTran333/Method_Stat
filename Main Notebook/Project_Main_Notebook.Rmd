@@ -26,9 +26,9 @@ h2 { /* Header 2 */
   color: DarkBlue;
 }
 h3 { /* Header 3 */
-  font-size: 18px;
+  font-size: 14px;
   font-family: "Times New Roman", Times, serif;
-  color: DarkBlue;
+  color: DarkRed;
 }
 code.r{ /* Code block */
     font-size: 12px;
@@ -154,6 +154,9 @@ call_price[4] <- Price_call(S_1, K[4], r_2, vol_1, M[4])
 
 # Compute the price of the portfolio and store it in 'PF_price_1'
 PF_price_1 <- sum(call_price)
+
+cat(sprintf("The European call options total book value is %.2f$.\n", PF_price_1))
+cat(sprintf("The options are worth respectively %.2f$, %.2f$, %.2f$, %.2f$.", call_price[1], call_price[2], call_price[3], call_price[4]))
 ```
 
 It is not surprising to see that the value of the first option is higher than the value of the second option. Indeed, since the strike price is lower for the first option, the first option is deeper ITM than the second option and it should therefore have a higher price. The same reasoning applies to the third and fourth options.
@@ -165,7 +168,6 @@ We now want to estimate the value-at-risk (VaR) and the expected shortfall (ES) 
 ```{r}
 # Daily underlying asset log returns
 log_return <- diff(log(sp_500))
-log_return <- log_return[-1]
 ```
 
 Next, we assume that the underlying asset log returns follow a normal distribution. The normal distribution parameters can be found by computing the empirical mean and standard deviation of the underlying asset daily log returns.
@@ -252,6 +254,9 @@ abline(v   = quantile(PL_1, probs = (1 - alpha)),
        lty = 1,
        lwd = 2.5,
        col = "red")
+
+cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_1))
+cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_1))
 ```
 
 [Discussion on the result (talk about asymmetry of call option payoffs) and the assumption (normal distribution, volatility is constant)]
@@ -264,7 +269,6 @@ library("MASS")
 
 # Daily VIX log returns
 vix_return <- diff(log(vix))
-vix_return <- vix_return[-1]
 
 # Store underlying asset log returns and VIX log returns in 'rets'
 rets     <- matrix(NA, nrow = n_ret, ncol = 2)
@@ -328,6 +332,9 @@ abline(v   = quantile(PL_2, probs = (1 - alpha)),
        lty = 1,
        lwd = 2.5,
        col = "red")
+
+cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_2))
+cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_2))
 ```
 
 [Discussion on the result (VaR is smaller because the underlying asset and the VIX are negatively correlated; when the value of the underlying asset drops, the volatility tends to rise and offsets the effect of the underlying asset price on the call option price) and the assumption (normal distribution for log returns)]
