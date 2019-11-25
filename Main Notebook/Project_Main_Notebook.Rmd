@@ -440,3 +440,99 @@ abline(v   = quantile(PL_3, probs = (1 - alpha)),
 
 
 # Part VIII: Full approach
+
+```{r}
+#install.packages("tseries")
+library("tseries")
+
+# Residuals of the log-returns of the underlying using a Garch(1,1) with Normal innovations
+garch_returns    <- garch(x = log_return, 
+                          order = c(1, 1),
+                          series = NULL)
+
+Resid_returns    <- garch_returns$residuals
+Resid_returns    <- Resid_returns[-1]
+
+# Residuals of the log-returns of the Vix 
+ar1_vix    <- ar.ols(vix_return, 
+                    order.max = 1, 
+                    demean = F, 
+                    intercept = T)
+
+Resid_vix  <- ar1_vix$resid
+Resid_vix  <- Resid_vix[-1]
+
+# Fit normal marginals by MLE
+fit1 <- suppressWarnings(fitdistr(x = Resid_returns,
+                         densfun = dnorm,
+                         start = list(mean = 0, sd = 1)))
+theta1 <- fit1$estimate
+
+fit2 <- suppressWarnings(fitdistr(x = Resid_vix,
+                         densfun = dnorm,
+                         start = list(mean = 0, sd = 1)))
+theta2 <- fit2$estimate
+
+# Compute 'U_1' and 'U_2' and combine these two variables in 'U'
+U1 <- pnorm(Resid_returns, mean = theta1[1], sd = theta1[2])
+U2 <- pnorm(Resid_vix, mean = theta2[1], sd = theta2[2])
+U  <- cbind(U1, U2)
+
+# Calibrate a Gaussian copula
+C   <- normalCopula(dim = 2)
+fit <- fitCopula(C, data = U, method = "ml")
+
+# Set seed for generating pseudo-random numbers
+set.seed(4321)
+sim_U             <- rCopula(H * t, fit@copula)
+sim_Resid_returns <- qnorm(sim_U[,1], mean = theta1[1], sd = theta1[2])
+sim_Resid_vix     <- qnorm(sim_U[,2], mean = theta2[1], sd = theta2[2])
+
+# Initialize the array 'sim_ret_4'
+sim_ret_4 <- array(data = NA, dim = c(H, 2, t))
+
+# Store in 'sim_ret_4' daily residuals of log returns for the underlying asset and the VIX
+for (i in 1:t) {
+  sim_ret_4[,,i] <- c(sim_Resid_returns[(H * (i - 1) + 1):(H * i)], sim_Resid_vix[(H * (i - 1) + 1):(H * i)])
+}
+
+# Initialize two vectors that contain the residuals of the underlying asset price and the VIX value one week from now
+S_5   <- rep(NA, H)
+vol_5 <- rep(NA, H)
+
+# Compute the underlying asset price and the VIX value one week from now
+for (i in 1:H) {
+  S_5[i]   <- S_1 * exp(sum(sim_ret_4[i,1,]))
+  vol_5[i] <- vol_1 * exp(sum(sim_ret_4[i,2,]))
+}
+
+# Initialize a matrix to store call prices (10 000 rows (1 per simulation), 4 columns (1 per option))
+call_price_5 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through 10 000 simulations and price each call option
+for (i in 1:10000){
+  call_price_5[i,1] <- Price_call(S_5[i], K[1], r_3, vol_5[i], M[1] - t / 250)
+  call_price_5[i,2] <- Price_call(S_5[i], K[2], r_3, vol_5[i], M[2] - t / 250)
+  call_price_5[i,3] <- Price_call(S_5[i], K[3], r_4, vol_5[i], M[3] - t / 250)
+  call_price_5[i,4] <- Price_call(S_5[i], K[4], r_4, vol_5[i], M[4] - t / 250)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_price_5'
+PF_price_5 <- rowSums(call_price_5)
+
+# Compute the P&L
+PL_4 <- PF_price_5 * exp(-(t / 360) * r_PL) - PF_price_1
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_4 <- sort(PL_4)[(1 - alpha) * H]
+ES_4  <- mean(sort(PL_4)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_4, nclass = round(10 * log(length(PL_4))), probability = TRUE)
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_4, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
