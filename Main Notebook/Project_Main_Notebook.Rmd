@@ -453,7 +453,7 @@ garch_returns    <- garch(x = log_return,
 Resid_returns    <- garch_returns$residuals
 Resid_returns    <- Resid_returns[-1]
 
-# Residuals of the log-returns of the Vix 
+# Residuals of the log-returns of the Vix using an AR(1) model 
 ar1_vix    <- ar.ols(vix_return, 
                     order.max = 1, 
                     demean = F, 
