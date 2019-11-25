@@ -446,21 +446,18 @@ abline(v   = quantile(PL_3, probs = (1 - alpha)),
 library("tseries")
 
 # Residuals of the log-returns of the underlying using a Garch(1,1) with Normal innovations
-garch_returns    <- garch(x = log_return, 
-                          order = c(1, 1),
-                          series = NULL)
 
-Resid_returns    <- garch_returns$residuals
-Resid_returns    <- Resid_returns[-1]
+spec   <- ugarchspec(variance.model = list(model = "sGARCH"),
+                     mean.model = list(armaOrder = c(0,0),
+                     include.mean = FALSE))
+
+fit           <- ugarchfit(spec = spec, data = log_return)
+residuals     <- fit@fit
+Resid_returns <- residuals$sigma
 
 # Residuals of the log-returns of the Vix using an AR(1) model 
-ar1_vix    <- ar.ols(vix_return, 
-                    order.max = 1, 
-                    demean = F, 
-                    intercept = T)
-
-Resid_vix  <- ar1_vix$resid
-Resid_vix  <- Resid_vix[-1]
+ar1_vix   <- arima(vix_return,order = c(1,0,0))
+Resid_vix <- ar1_vix$residuals
 
 # Fit normal marginals by MLE
 fit1 <- suppressWarnings(fitdistr(x = Resid_returns,
