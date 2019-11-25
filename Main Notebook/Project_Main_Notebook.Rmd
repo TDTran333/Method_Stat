@@ -34,7 +34,7 @@ code.r{ /* Code block */
     font-size: 12px;
 }
 pre { /* Code block - determines code spacing between lines */
-    font-size: 14px;
+    font-size: 12px;
 }
 </style>
 
@@ -76,7 +76,6 @@ library("here")
 
 # Load the data
 load(file = here("Data", "Market.rda"))
-
 # Load the functions
 source(file = here("Functions", "price_call.r")) # Prices calls using the Black-Scholes formula
 source(file = here("Functions", "lin_inter.r"))  # Linear interpolation of the interest rates
@@ -154,7 +153,9 @@ call_price[4] <- Price_call(S_1, K[4], r_2, vol_1, M[4])
 
 # Compute the price of the portfolio and store it in 'PF_price_1'
 PF_price_1 <- sum(call_price)
+```
 
+```{r echo=FALSE}
 cat(sprintf("The European call options total book value is %.2f$.\n", PF_price_1))
 cat(sprintf("The options are worth respectively %.2f$, %.2f$, %.2f$, %.2f$.", call_price[1], call_price[2], call_price[3], call_price[4]))
 ```
@@ -254,7 +255,9 @@ abline(v   = quantile(PL_1, probs = (1 - alpha)),
        lty = 1,
        lwd = 2.5,
        col = "red")
+```
 
+```{r echo=FALSE}
 cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_1))
 cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_1))
 ```
@@ -332,7 +335,9 @@ abline(v   = quantile(PL_2, probs = (1 - alpha)),
        lty = 1,
        lwd = 2.5,
        col = "red")
+```
 
+```{r echo=FALSE}
 cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_2))
 cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_2))
 ```
@@ -347,6 +352,9 @@ library("copula")
 
 # install.packages("fGarch")
 library("fGarch")
+library("timeDate")
+library("timeSeries")
+library("fBasics")
 
 # Load the function
 source(file = here("Functions", "nll_student.r")) # Computes the negative log-likelihood function
@@ -441,9 +449,17 @@ abline(v   = quantile(PL_3, probs = (1 - alpha)),
        lwd = 2.5,
        col = "red")
 ```
+
+```{r echo=FALSE}
+cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_3))
+cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_3))
+```
 # Part VII: Volatility Surface
+```{r}
 
-
-
+```
 
 # Part VIII: Full approach
+```{r}
+
+```
