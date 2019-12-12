@@ -76,6 +76,7 @@ library("here")
 
 # Load the data
 load(file = here("Data", "Market.rda"))
+
 # Load the functions
 source(file = here("Functions", "price_call.r")) # Prices calls using the Black-Scholes formula
 source(file = here("Functions", "lin_inter.r"))  # Linear interpolation of the interest rates
@@ -146,18 +147,22 @@ M <- book_1[,4]
 call_price <- c(rep(NA, 4))
 
 # Compute the option values and store them in 'call_price'
-call_price[1] <- Price_call(S_1, K[1], r_1, vol_1, M[1])
-call_price[2] <- Price_call(S_1, K[2], r_1, vol_1, M[2])
-call_price[3] <- Price_call(S_1, K[3], r_2, vol_1, M[3])
-call_price[4] <- Price_call(S_1, K[4], r_2, vol_1, M[4])
+call_price[1] <- price_call(S_1, K[1], r_1, vol_1, M[1])
+call_price[2] <- price_call(S_1, K[2], r_1, vol_1, M[2])
+call_price[3] <- price_call(S_1, K[3], r_2, vol_1, M[3])
+call_price[4] <- price_call(S_1, K[4], r_2, vol_1, M[4])
 
 # Compute the price of the portfolio and store it in 'PF_price_1'
 PF_price_1 <- sum(call_price)
 ```
 
 ```{r echo=FALSE}
-cat(sprintf("The European call options total book value is %.2f$.\n", PF_price_1))
-cat(sprintf("The options are worth respectively %.2f$, %.2f$, %.2f$, %.2f$.", call_price[1], call_price[2], call_price[3], call_price[4]))
+# Output the results
+cat(sprintf("The value of the portfolio of European call options is %.2f$.\n", PF_price_1))
+cat(sprintf("The options are worth respectively %.2f$, %.2f$, %.2f$, %.2f$.", call_price[1],
+                                                                              call_price[2],
+                                                                              call_price[3],
+                                                                              call_price[4]))
 ```
 
 It is not surprising to see that the value of the first option is higher than the value of the second option. Indeed, since the strike price is lower for the first option, the first option is deeper ITM than the second option and it should therefore have a higher price. The same reasoning applies to the third and fourth options.
@@ -217,10 +222,10 @@ call_price_2 <- matrix(NA, nrow = H, ncol = 4)
 
 # Loop through 10 000 simulations and price each call option
 for (i in 1:10000){
-  call_price_2[i,1] <- Price_call(S_2[i], K[1], r_3, vol_1, M[1] - t / 250)
-  call_price_2[i,2] <- Price_call(S_2[i], K[2], r_3, vol_1, M[2] - t / 250)
-  call_price_2[i,3] <- Price_call(S_2[i], K[3], r_4, vol_1, M[3] - t / 250)
-  call_price_2[i,4] <- Price_call(S_2[i], K[4], r_4, vol_1, M[4] - t / 250)
+  call_price_2[i,1] <- price_call(S_2[i], K[1], r_3, vol_1, M[1] - t / 250)
+  call_price_2[i,2] <- price_call(S_2[i], K[2], r_3, vol_1, M[2] - t / 250)
+  call_price_2[i,3] <- price_call(S_2[i], K[3], r_4, vol_1, M[3] - t / 250)
+  call_price_2[i,4] <- price_call(S_2[i], K[4], r_4, vol_1, M[4] - t / 250)
 }
 ```
 
@@ -258,8 +263,9 @@ abline(v   = quantile(PL_1, probs = (1 - alpha)),
 ```
 
 ```{r echo=FALSE}
-cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_1))
-cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_1))
+# Output the results
+cat(sprintf("The value at risk at alpha = %.2f is %.2f$. \n", alpha, VaR_1))
+cat(sprintf("The expected shortfall at alpha = %.2f is %.2f$.", alpha, ES_1))
 ```
 
 [Discussion on the result (talk about asymmetry of call option payoffs) and the assumption (normal distribution, volatility is constant)]
@@ -311,10 +317,10 @@ call_price_3 <- matrix(NA, nrow = H, ncol = 4)
 
 # Loop through 10 000 simulations and price each call option
 for (i in 1:10000){
-  call_price_3[i,1] <- Price_call(S_3[i], K[1], r_3, vol_3[i], M[1] - t / 250)
-  call_price_3[i,2] <- Price_call(S_3[i], K[2], r_3, vol_3[i], M[2] - t / 250)
-  call_price_3[i,3] <- Price_call(S_3[i], K[3], r_4, vol_3[i], M[3] - t / 250)
-  call_price_3[i,4] <- Price_call(S_3[i], K[4], r_4, vol_3[i], M[4] - t / 250)
+  call_price_3[i,1] <- price_call(S_3[i], K[1], r_3, vol_3[i], M[1] - t / 250)
+  call_price_3[i,2] <- price_call(S_3[i], K[2], r_3, vol_3[i], M[2] - t / 250)
+  call_price_3[i,3] <- price_call(S_3[i], K[3], r_4, vol_3[i], M[3] - t / 250)
+  call_price_3[i,4] <- price_call(S_3[i], K[4], r_4, vol_3[i], M[4] - t / 250)
 }
 
 # Compute the price of the portfolio for each replication and store it in 'PF_price_3'
@@ -338,8 +344,9 @@ abline(v   = quantile(PL_2, probs = (1 - alpha)),
 ```
 
 ```{r echo=FALSE}
-cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_2))
-cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_2))
+# Output the results
+cat(sprintf("The value at risk at alpha = %.2f is %.2f$. \n", alpha, VaR_2))
+cat(sprintf("The expected shortfall at alpha = %.2f is %.2f$.", alpha, ES_2))
 ```
 
 [Discussion on the result (VaR is smaller because the underlying asset and the VIX are negatively correlated; when the value of the underlying asset drops, the volatility tends to rise and offsets the effect of the underlying asset price on the call option price) and the assumption (normal distribution for log returns)]
@@ -424,10 +431,10 @@ call_price_4 <- matrix(NA, nrow = H, ncol = 4)
 
 # Loop through 10 000 simulations and price each call option
 for (i in 1:10000){
-  call_price_4[i,1] <- Price_call(S_4[i], K[1], r_3, vol_4[i], M[1] - t / 250)
-  call_price_4[i,2] <- Price_call(S_4[i], K[2], r_3, vol_4[i], M[2] - t / 250)
-  call_price_4[i,3] <- Price_call(S_4[i], K[3], r_4, vol_4[i], M[3] - t / 250)
-  call_price_4[i,4] <- Price_call(S_4[i], K[4], r_4, vol_4[i], M[4] - t / 250)
+  call_price_4[i,1] <- price_call(S_4[i], K[1], r_3, vol_4[i], M[1] - t / 250)
+  call_price_4[i,2] <- price_call(S_4[i], K[2], r_3, vol_4[i], M[2] - t / 250)
+  call_price_4[i,3] <- price_call(S_4[i], K[3], r_4, vol_4[i], M[3] - t / 250)
+  call_price_4[i,4] <- price_call(S_4[i], K[4], r_4, vol_4[i], M[4] - t / 250)
 }
 
 # Compute the price of the portfolio for each replication and store it in 'PF_price_4'
@@ -451,11 +458,73 @@ abline(v   = quantile(PL_3, probs = (1 - alpha)),
 ```
 
 ```{r echo=FALSE}
-cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_3))
-cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_3))
+# Output the results
+cat(sprintf("The value at risk at alpha = %.2f is %.2f$. \n", alpha, VaR_3))
+cat(sprintf("The expected shortfall at alpha = %.2f is %.2f$.", alpha, ES_3))
 ```
+
 # Part VII: Volatility Surface
+
 ```{r}
+#install.packages("rgl")
+library("rgl")
+
+# Load the functions
+source(file = here("Functions", "vol_surface.R"))   # Implied volatility of an option
+source(file = here("Functions", "vol_calibrate.r")) # Sum of absolute deviations of implied volalities
+
+# Count the number of traded options
+nb_opts <- nrow(Market$calls) + nrow(Market$puts)
+
+# Build a matrix that contains the information relevant to traded call and put options
+mkt_vol <- matrix(NA, nrow = nb_opts, ncol = 4)
+
+# Assign names to columns
+colnames(mkt_vol) <- c("S", "K", "tau", "IV")
+
+# Latest underlying asset price (spot price)
+mkt_vol[,1] <- t(t(rep(sp_500[n_obs], nb_opts)))
+
+# Strike price of call options
+mkt_vol[1:nrow(Market$calls),2] <- Market$calls[,1]
+
+# Strike price of put options
+mkt_vol[(nrow(Market$calls)+1):nb_opts,2] <- Market$puts[,1]
+
+# Time to expiry of call options
+mkt_vol[1:nrow(Market$calls),3] <- Market$calls[,2]
+
+# Time to expiry of put options
+mkt_vol[(nrow(Market$calls)+1):nb_opts,3] <- Market$puts[,2]
+
+# Implied volatility of call options
+mkt_vol[1:nrow(Market$calls),4] <- Market$calls[,3]
+
+# Implied volatility of put options
+mkt_vol[(nrow(Market$calls)+1):nb_opts,4] <- Market$puts[,3]
+
+# Set a vector of initial values of a1, a2, a3, and a4
+x0 <- c(0.2, 1, 1, 0.1)
+
+# Calibrate the volatility surface on traded call and put options
+tmp <- optim(par = x0,
+             fn = vol_calibrate)
+
+# Store parameters in 'theta_vol'
+theta_vol <- tmp$par
+
+# Generate a sequence of strike price and time to expiry
+x1 <- sp_500[n_obs] * seq(0.5, 1.5, (1.5 - 0.5) / 1000)
+x2 <- seq(0.01, 2, (2 - 0.01) / 1000)
+
+# Generate al possible combinations of 'x1' and 'x2'
+x3 <- expand.grid(x1,x2)
+
+# Compute the implied volatility for each combination
+y  <- vol_surface(sp_500[n_obs], x3[,1], x3[,2], theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
+
+# Create a 3D-plot of the fitted volatility surface
+plot3d(x3[,1], x3[,2], y)
 
 ```
 
@@ -526,10 +595,10 @@ call_price_5 <- matrix(NA, nrow = H, ncol = 4)
 
 # Loop through 10 000 simulations and price each call option
 for (i in 1:10000){
-  call_price_5[i,1] <- Price_call(S_5[i], K[1], r_3, vol_5[i], M[1] - t / 250)
-  call_price_5[i,2] <- Price_call(S_5[i], K[2], r_3, vol_5[i], M[2] - t / 250)
-  call_price_5[i,3] <- Price_call(S_5[i], K[3], r_4, vol_5[i], M[3] - t / 250)
-  call_price_5[i,4] <- Price_call(S_5[i], K[4], r_4, vol_5[i], M[4] - t / 250)
+  call_price_5[i,1] <- price_call(S_5[i], K[1], r_3, vol_5[i], M[1] - t / 250)
+  call_price_5[i,2] <- price_call(S_5[i], K[2], r_3, vol_5[i], M[2] - t / 250)
+  call_price_5[i,3] <- price_call(S_5[i], K[3], r_4, vol_5[i], M[3] - t / 250)
+  call_price_5[i,4] <- price_call(S_5[i], K[4], r_4, vol_5[i], M[4] - t / 250)
 }
 
 # Compute the price of the portfolio for each replication and store it in 'PF_price_5'
@@ -550,7 +619,4 @@ abline(v   = quantile(PL_4, probs = (1 - alpha)),
        lty = 1,
        lwd = 2.5,
        col = "red")
-```
-```{r}
-
 ```
