@@ -1,4 +1,4 @@
-price_call <- function(S, K, r, vol, M) {
+price_BS <- function(S, K, r, vol, M, Type) {
   # This function takes as input the underlying asset price (S), the
   # option strike price (K), the risk-free rate (r), the volatility
   # (vol), and the option time to expiry (M) in year (360-day basis).
@@ -10,14 +10,15 @@ price_call <- function(S, K, r, vol, M) {
   d_1 <- (log(S / K) + (r + vol^2 / 2) * M) / (vol * M^0.5)
   d_2 <- d_1 - vol * M^0.5
   
-  # Compute the call option price
+  # Compute the option price
+  if (Type == 1) {
   price <- S * pnorm(d_1) - K * exp(-r * M) * pnorm(d_2)
-  
-  # Make sure the call options price is larger or equal to zero
-  if (price < 0) {
-      price <- 0
+  } else if (Type == 0) {
+  price <- K * exp(-r * M) * pnorm(-d_2) - S * pnorm(-d_1)
+  } else {
+    stop("Wrong option type. Specify Call (1) or Put (0).")
   }
   
-  # Output the call option price
+  # Output the option price
   return(price)
 }

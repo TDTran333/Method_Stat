@@ -1,8 +1,9 @@
 ---
 title: "Statistical Methods in Financial Engineering - Risk Management Project"
-author: Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest, Thien Duy Tran
+author: "Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest, Thien Duy Tran"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
-output: html_notebook
+output:
+  html_notebook: default
 ---
 
 <style type="text/css">
@@ -78,7 +79,7 @@ library("here")
 load(file = here("Data", "Market.rda"))
 
 # Load the functions
-source(file = here("Functions", "price_call.r")) # Prices calls using the Black-Scholes formula
+source(file = here("Functions", "price_BS.r")) # Option prices using the Black-Scholes formula
 source(file = here("Functions", "lin_inter.r"))  # Linear interpolation of the interest rates
 
 # Assign data to different variables
@@ -102,16 +103,17 @@ The portfolio under consideration contains four options: K = 1600 and T-t = 20 d
 
 ```{r}
 # Create matrix
-book_1 <- matrix(data = NA, nrow = 4, ncol = 4)
+book_1 <- matrix(data = NA, nrow = 4, ncol = 6)
 
 # Assign names to columns
-colnames(book_1) <- c("Quantity", "Call", "StrikePrice", "Maturity")
+# Option Type: Call = 1, Put = 0
+colnames(book_1) <- c("Quantity", "Option Type", "Strike Price", "Maturity", "Option Value", "Position Value")
 
 # Store initial values
-book_1[1,] <- c(1, 1, 1600, 20 / 250)
-book_1[2,] <- c(1, 1, 1650, 20 / 250)
-book_1[3,] <- c(1, 1, 1750, 40 / 250)
-book_1[4,] <- c(1, 1, 1800, 40 / 250)
+book_1[1,1:4] <- c(1, 1, 1600, 20 / 250)
+book_1[2,1:4] <- c(1, 1, 1650, 20 / 250)
+book_1[3,1:4] <- c(1, 1, 1750, 40 / 250)
+book_1[4,1:4] <- c(1, 1, 1800, 40 / 250)
 ```
 
 The next step is to use the most recent underlying asset price and VIX value as well as the interpolated risk-free rates to compute the value of each option in the portfolio that we store in the variable 'call_price'. The value of the portfolio of options is simply the sum of each option's value. To do this, we use two functions described below.
@@ -143,26 +145,26 @@ K <- book_1[,3]
 # Maturities
 M <- book_1[,4]
 
-# Initialize a vector to store call prices
-call_price <- c(rep(NA, 4))
+# Option type
+Type <- book_1[,2]
 
-# Compute the option values and store them in 'call_price'
-call_price[1] <- price_call(S_1, K[1], r_1, vol_1, M[1])
-call_price[2] <- price_call(S_1, K[2], r_1, vol_1, M[2])
-call_price[3] <- price_call(S_1, K[3], r_2, vol_1, M[3])
-call_price[4] <- price_call(S_1, K[4], r_2, vol_1, M[4])
+# Compute the option values
+book_1[1,5] <- price_BS(S_1, K[1], r_1, vol_1, M[1], Type[1])
+book_1[2,5] <- price_BS(S_1, K[2], r_1, vol_1, M[2], Type[1])
+book_1[3,5] <- price_BS(S_1, K[3], r_2, vol_1, M[3], Type[1])
+book_1[4,5] <- price_BS(S_1, K[4], r_2, vol_1, M[4], Type[1])
 
 # Compute the price of the portfolio and store it in 'PF_price_1'
-PF_price_1 <- sum(call_price)
+book_1[,6] = book_1[,1]*book_1[,5]
+
+PF_price_1 <- sum(book_1[,6])
 ```
 
 ```{r echo=FALSE}
 # Output the results
-cat(sprintf("The value of the portfolio of European call options is %.2f$.\n", PF_price_1))
-cat(sprintf("The options are worth respectively %.2f$, %.2f$, %.2f$, %.2f$.", call_price[1],
-                                                                              call_price[2],
-                                                                              call_price[3],
-                                                                              call_price[4]))
+cat(sprintf("The total value of the Options Portfolio is %.2f$.\n", PF_price_1))
+cat(sprintf("\nPortfolio detail:\n\n"))
+print(format(book_1, digits=2), quote = FALSE)
 ```
 
 It is not surprising to see that the value of the first option is higher than the value of the second option. Indeed, since the strike price is lower for the first option, the first option is deeper ITM than the second option and it should therefore have a higher price. The same reasoning applies to the third and fourth options.
