@@ -551,6 +551,7 @@ abline(v   = quantile(PL_4, probs = (1 - alpha)),
        lwd = 2.5,
        col = "red")
 ```
+
 ```{r echo=FALSE}
 cat(sprintf("The value at risk at alpha=%.2f is %.2f$. \n", alpha, VaR_4))
 cat(sprintf("The expected shortfall at alpha=%.2f is %.2f$.", alpha, ES_4))
