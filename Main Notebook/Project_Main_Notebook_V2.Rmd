@@ -133,7 +133,7 @@ rf <- mapply(lin_inter, m)
 
 # Latest underlying asset price (spot price)
 S0 <- sp_500[n_obs]
-S <- matrix(data = S0 , nrow = 4)
+S <- matrix(data = S0, nrow = 4)
 
 # Latest VIX value
 vol0 <- vix[n_obs]
@@ -461,8 +461,11 @@ library("rgl")
 source(file = here("Functions", "vol_surface.R"))   # Implied volatility of an option
 source(file = here("Functions", "vol_calibrate.r")) # Sum of absolute deviations of implied volalities
 
+calls <- as.matrix(Market$calls)
+puts <- as.matrix(Market$puts)
+                   
 # Count the number of traded options
-nb_opts <- nrow(Market$calls) + nrow(Market$puts)
+nb_opts <- nrow(calls) + nrow(puts)
 
 # Build a matrix that contains the information relevant to traded call and put options
 mkt_vol <- matrix(NA, nrow = nb_opts, ncol = 4)
@@ -471,30 +474,21 @@ mkt_vol <- matrix(NA, nrow = nb_opts, ncol = 4)
 colnames(mkt_vol) <- c("S", "K", "tau", "IV")
 
 # Latest underlying asset price (spot price)
-mkt_vol[,1] <- t(t(rep(sp_500[n_obs], nb_opts)))
+mkt_vol[,1] <- matrix(data = S0, nb_opts)
 
-# Strike price of call options
-mkt_vol[1:nrow(Market$calls),2] <- Market$calls[,1]
+# Strike price of options
+mkt_vol[,2] <- c(calls[,1], puts[,1])
 
-# Strike price of put options
-mkt_vol[(nrow(Market$calls)+1):nb_opts,2] <- Market$puts[,1]
+# Time to expiry of options
+mkt_vol[,3] <- c(calls[,2], puts[,2])
 
-# Time to expiry of call options
-mkt_vol[1:nrow(Market$calls),3] <- Market$calls[,2]
-
-# Time to expiry of put options
-mkt_vol[(nrow(Market$calls)+1):nb_opts,3] <- Market$puts[,2]
-
-# Implied volatility of call options
-mkt_vol[1:nrow(Market$calls),4] <- Market$calls[,3]
-
-# Implied volatility of put options
-mkt_vol[(nrow(Market$calls)+1):nb_opts,4] <- Market$puts[,3]
+# Implied volatility of options
+mkt_vol[,4] <- c(calls[,3], puts[,3])
 
 # Set a vector of initial values of a1, a2, a3, and a4
 x0 <- c(0.2, 1, 1, 0.1)
 
-# Calibrate the volatility surface on traded call and put options
+# Calibrate the volatility surface on traded options
 tmp <- optim(par = x0,
              fn = vol_calibrate)
 
@@ -502,17 +496,29 @@ tmp <- optim(par = x0,
 theta_vol <- tmp$par
 
 # Generate a sequence of strike price and time to expiry
-x1 <- sp_500[n_obs] * seq(0.5, 1.5, (1.5 - 0.5) / 1000)
+x1 <- S0 * seq(0.5, 1.5, (1.5 - 0.5) / 1000)
 x2 <- seq(0.01, 2, (2 - 0.01) / 1000)
 
 # Generate al possible combinations of 'x1' and 'x2'
 x3 <- expand.grid(x1,x2)
 
 # Compute the implied volatility for each combination
-y  <- vol_surface(sp_500[n_obs], x3[,1], x3[,2], theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
+y  <- vol_surface(S0, x3[,1], x3[,2], theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
 
 # Create a 3D-plot of the fitted volatility surface
 plot3d(x3[,1], x3[,2], y)
+```
+Re-price the portfolio in one week assuming the same parametric model but shifted by the one-year
+ATM implied volatility difference.
+Note. ATM means at-the-money, which means that m = 1. Assume that the one-year ATM implied volatility
+given by the VIX is (a1 + a4).
+
+```{r}
+
+
+
+
+
 
 ```
 
