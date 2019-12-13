@@ -1,4 +1,4 @@
-Price_call <- function(S, K, r, vol, M) {
+price_call <- function(S, K, r, vol, M) {
   # This function takes as input the underlying asset price (S), the
   # option strike price (K), the risk-free rate (r), the volatility
   # (vol), and the option time to expiry (M) in year (360-day basis).
