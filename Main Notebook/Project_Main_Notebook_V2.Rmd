@@ -420,7 +420,7 @@ for (i in 1:H) {
 # Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))
 sim_price_3 <- matrix(NA, nrow = H, ncol = 4)
 
-# Loop through H simulations and price each call option
+# Loop through H simulations and price each option
 for (i in 1:H){
   sim_price_3[i,] <- mapply(price_BS, sim_S_3[i], K, rf_m_t, sim_vol_3[i], M - t / 250, Type)
 }
@@ -515,8 +515,59 @@ given by the VIX is (a1 + a4).
 
 ```{r}
 
+vix_atm_IV <- theta_vol[1] + theta_vol[4]
+vix_1y_atm_IV <- vol_surface(S0, S0, 1, theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
 
+vol_shift <- vix_1y_atm_IV - vix_atm_IV 
 
+# Set seed for generating pseudo-random numbers
+seed(use_set_seed)
+
+# Initialize the array 'sim_ret_4'
+sim_ret_4 <- array(data = NA, dim = c(H, 2, t))
+
+# Store in 'sim_ret_3' daily log returns for the underlying asset and the VIX
+for (i in 1:t) {
+  sim_ret_4[,,i] <- c(sim_log_ret[(H * (i - 1) + 1):(H * i)], sim_vix_ret[(H * (i - 1) + 1):(H * i)])
+}
+
+# Initialize two vectors that contain the underlying asset price and the VIX value one week from now
+sim_S_4 <- rep(NA, H)
+sim_vol_4 <- rep(NA, H)
+
+# Compute the underlying asset price and the VIX value one week from now
+for (i in 1:H) {
+  sim_S_4[i]   <- S0 * exp(sum(sim_ret_3[i,1,]))
+  sim_vol_4[i] <- vol0 * exp(sum(sim_ret_3[i,2,]))
+}
+
+# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))
+sim_price_4 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through H simulations and price each option
+for (i in 1:H){
+  sim_price_4[i,] <- mapply(price_BS, sim_S_3[i], K, rf_m_t, sim_vol_3[i], M - t / 250, Type)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_val_3'
+PF_val_4 <- rowSums(sim_price_4)
+
+# Compute the P&L
+PL_4 <- PF_val_4 * exp(-(t / 360) * rf_t) - PF_val
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_4 <- sort(PL_4)[(1 - alpha) * H]
+ES_4  <- mean(sort(PL_4)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_4, nclass = round(10 * log(length(PL_4))), probability = TRUE)
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_4, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
 
 
 
