@@ -138,7 +138,7 @@ S <- matrix(data = S0, nrow = 4)
 
 # Latest VIX value
 Vol0 <- vix[n_obs]
-Vol <- matrix(data = vol0, nrow = 4)
+Vol <- matrix(data = Vol0, nrow = 4)
 
 # Strike prices
 K <- book[,3]
@@ -184,7 +184,7 @@ n_ret <- length(log_return)
 # Calibration
 mu_hat_1 <- mean(log_return)
 s2_hat_1 <- var(log_return)
-sd_hat_1  <- s2_hat^0.5
+sd_hat_1  <- s2_hat_1^0.5
 
 # Store parameters in 'theta_1'
 theta_1 <- c(mu_hat_1, sd_hat_1)
@@ -430,7 +430,7 @@ sim_vol_3 <- rep(NA, H)
 # Compute the underlying asset price and the VIX value one week from now
 for (i in 1:H) {
   sim_S_3[i]   <- S0 * exp(sum(sim_ret_3[i,1,]))
-  sim_vol_3[i] <- vol0 * exp(sum(sim_ret_3[i,2,]))
+  sim_vol_3[i] <- Vol0 * exp(sum(sim_ret_3[i,2,]))
 }
 
 # Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))
@@ -654,7 +654,7 @@ for (i in 1:H){
 PF_val_5 <- rowSums(sim_price_5)
 
 # Compute the P&L
-PL_5 <- PF_val_5 * exp(-(t / 360) * r_PL) - PF_val
+PL_5 <- PF_val_5 * exp(-(t / 360) * rf_t) - PF_val
 
 # Compute the VaR and the ES of the P&L distribution
 VaR_5 <- sort(PL_5)[(1 - alpha) * H]
@@ -676,6 +676,21 @@ cat(sprintf("The value at risk at alpha %.2f is %.2f$. \n", alpha, VaR_5))
 cat(sprintf("The expected shortfall at alpha %.2f is %.2f$.", alpha, ES_5))
 ```
 
-# Part IX: Results comparison
+# Part IX: Results and Conclusion
 
-# Part X: Conclusion
+```{r}
+# Output the results
+Results     <- matrix(NA, nrow=2, ncol=5)
+Results[1,] <- c(VaR_1, VaR_2, VaR_3, VaR_4, VaR_5)
+Results[2,] <- c(ES_1, ES_2, ES_3, ES_4, ES_5)
+
+colnames(Results) <- c("M1: 1 risk/Gauss", "M2: 2 risks/Gauss", "M3: 2 risk/Copula", "M4: Vol Surface", "M5: Full Approach")
+rownames(Results) <- c("Value At Risk", "Expected Shortfall")
+
+cat(sprintf("Portfolio value %.2f$.\n", PF_val))
+cat(sprintf("\nPortfolio detail:\n\n"))
+print(format(book, digits=2), quote = F)
+
+cat(sprintf("\nPortfolio 5-days risk:\n\n"))
+print(format(Results, digits=5,  justify = "centre"), quote = F)
+```
