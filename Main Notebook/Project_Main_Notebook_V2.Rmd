@@ -69,7 +69,8 @@ The objective of this project is to implement the risk management framework used
 # Part II: Data
 
 ## Loading the Data
-The first step is to load the database 'Market'. 'Market' is a list of 5 elements: S&P500 index prices, VIX values, the term structure of interest rates, and traded call and put options information. To make sure this code can run on any platform, we use the library 'here'.
+The first step is to load the database 'Market'. 'Market' is a list of 5 elements: S&P500 index prices, VIX values, the term structure of interest rates, and traded call and put options information. To make sure this code can run on any platform, we use the library 'here'. Also, we load 2 functions, the first one is use to price options using Black-Scholes and the second one is use to interpolate the term structure of interest. These functions will be detailled further in this script.
+
 
 ```{r}
 # install.packages("here")
@@ -99,7 +100,7 @@ colnames(rates) <- c("Maturities", "Risk-free Rates")
 
 # Part III: Pricing a Portfolio of Options
 
-The portfolio under consideration contains four options: K = 1600 and T-t = 20 days, K = 1650 and T-t = 20 days, K = 1750 and T-t = 40 days, and K = 1800 and T-t = 40 days. We assume that there is 250 days in a year and thus convert times to expiry in years by dividing by 250. We first create a matrix 'book' that contains information regarding the options in the portfolio.
+The portfolio under consideration contains four options: K = 1600 and T-t = 20 days, K = 1650 and T-t = 20 days, K = 1750 and T-t = 40 days, and K = 1800 and T-t = 40 days. K is the strike price and T-t is days before maturity. We assume that there is 250 days in a year and thus convert times to expiry in years by dividing by 250. We first create a matrix 'book' that contains information regarding the options in the portfolio.
 
 ```{r}
 # Create matrix
@@ -107,7 +108,7 @@ book <- matrix(data = NA, nrow = 4, ncol = 6)
 
 # Assign names to columns
 # Option Type: Call = 1, Put = 0
-colnames(book) <- c("Quantity", "Option Type", "Strike Price", "Maturity", "Option Value", "Position Value")
+colnames(book) <- c("Quantity", "Option Type", "Strike Price", "Maturity", "Option price", "Position Value")
 
 # Store initial values
 book[1,1:4] <- c(1, 1, 1600, 20 / 250)
@@ -205,13 +206,25 @@ seed(use_set_seed)
 
 # Store in 'sim_ret_1' normally distributed IID shocks with mean 'mu_hat' and standard deviation 'sd_hat'
 sim_ret_1 <- matrix(rnorm(t * H, mean = theta_1[1], sd = theta_1[2]), nrow = H, ncol = t)
+
+# Histogram of the simulated returns
+hist(sim_ret_1, nclass = round(10 * log(length(sim_ret_1))), probability = TRUE, main = "Histogram of 10 000 simulated return", xlab = "simulated returns")
 ```
 
-In order to obtain the underlying asset price one week from now, we simply have to compute the exponential sum of the five daily normally distributed IID shocks per trajectory and multiply by the latest underlying asset price. The last thing we need to modify is the risk-free rate for the remaining life of the option. The strike price does not change over the option life and the volatility is assumed to be constant.
+In order to obtain the underlying asset price one week from now, we simply have to compute the exponential sum of the five daily normally distributed IID shocks per trajectory and multiply by the latest underlying asset price. The last things we need to modify are the risk-free rate for the remaining life of the option and the remaining days of the option. The strike price does not change over the option life and the volatility is assumed to be constant.
 
 ```{r}
 # Compute the price of the underlying asset one week from now
 sim_S_1 <- S0 * exp(rowSums(sim_ret_1))
+
+# Histogram of the simulated prices
+hist(sim_S_1, nclass = round(10 * log(length(sim_S_1))), probability = TRUE, main = "Histogram of 10 000 simulated prices", xlab = "simulated prices")
+
+# Add a verticale line that represent last price asset
+abline(v   = S0,
+       lty = 1,
+       lwd = 2.5,
+       col = "blue")
 
 # Update the risk-free rate (360-day basis year)
 rf_m_t <- mapply(lin_inter,(m - t / 360))
@@ -238,7 +251,10 @@ rf_t <- lin_inter(t / 360)
 PL_1 <- PF_val_1 * exp(-(t / 360) * rf_t) - PF_val
 ```
 
-The last step is to compute the VaR and the ES of the portfolio of options P&L distribution. In order to do so, we sort the P&L values in ascending order and identify the (1-alpha)-quartile of the distribution for the VaR, where alpha is the risk level (in our case, 0.95). The ES is simply the mean of the P&L values smaller than the VaR.
+Based on the previous histogram (and the simulation) we can notice that the porfolio of call in function of the price of the underlying asset at t0 is right skewed. Calls value is therefore more sensible to a rising price of the underlying asset than a falling one.
+
+The last step is to compute the VaR and the ES of the portfolio of options P&L distribution. In order to do so, we sort the P&L values in ascending order and identify the (1-alpha)-quartile of the empirical distribution for the VaR, where alpha is the risk level (in our case, 0.95). The ES is simply the mean of the P&L values smaller than the VaR.
+
 
 ```{r}
 # Set alpha to a desired significance level
