@@ -3,6 +3,8 @@ title: "Statistical Methods in Financial Engineering - Risk Management Project"
 author: "Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest, Thien Duy Tran"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 output:
+  word_document: default
+  pdf_document: default
   html_notebook: default
 ---
 

@@ -1,0 +1,1264 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Statistical Methods in Financial Engineering - Risk Management Project},
+            pdfauthor={Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest, Thien Duy Tran},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Statistical Methods in Financial Engineering - Risk Management
+Project}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest,
+Thien Duy Tran}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{December 14, 2019}
+
+
+\begin{document}
+\maketitle
+
+\hypertarget{loom-video-link}{%
+\section{LOOM video link:}\label{loom-video-link}}
+
+\hypertarget{part-i-project-guidelines}{%
+\section{Part I: Project Guidelines}\label{part-i-project-guidelines}}
+
+\hypertarget{context}{%
+\subsection{Context}\label{context}}
+
+You work as a quantitative analyst for a large investment bank. You and
+your team are responsible for challenging the models used by traders and
+risk managers. You work with R and love reproducible research. All your
+files are written in Rmarkdown or R notebook.
+
+You can watch the introductory video on Rmarkdown to help you build
+properly the R file. Moreover, you use GitHub with your team. You'll
+build a dedicated project for the tasks below and use RStudio with
+GitHub extensively. You also use Loom to share your findings with other
+teams in the investment bank.
+
+\hypertarget{learning-objectives}{%
+\subsection{Learning Objectives}\label{learning-objectives}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Content (scientific rigor, concepts, creativity).\\
+\item
+  Choose the right tools.\\
+\item
+  Implement the steps correctly.\\
+\item
+  Come up with innovative solutions.\\
+\end{enumerate}
+
+\hypertarget{form-coding-collaboration-and-presentation}{%
+\subsection{Form: Coding, Collaboration and
+Presentation}\label{form-coding-collaboration-and-presentation}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Build RStudio project with proper folder structure and
+  Rmarkdown/nootebook file to reproduce your results.\\
+\item
+  Program with state-of-the-art coding standards.\\
+\item
+  Use GitHub repository for collaborative research.\\
+\item
+  Use Loom video for presenting your results.
+\end{enumerate}
+
+\hypertarget{objective}{%
+\subsection{Objective}\label{objective}}
+
+The objective of this project is to implement the risk management
+framework used for estimating the risk of a book of European call
+options by taking into account risk drivers such as the underlying asset
+and the implied volatility of the options.
+
+\hypertarget{part-ii-data}{%
+\section{Part II: Data}\label{part-ii-data}}
+
+\hypertarget{loading-the-data}{%
+\subsection{Loading the Data}\label{loading-the-data}}
+
+The first step is to load the database `Market'. `Market' is a list of 5
+elements: S\&P500 index prices, VIX values, the term structure of
+interest rates, and traded call and put options information. To make
+sure this code can run on any platform, we use the library `here'. Also,
+we load 2 functions, the first one is use to price options using
+Black-Scholes and the second one is use to interpolate the term
+structure of interest rates. These functions will be detailled further
+in this script.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# install.packages("here")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"here"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## here() starts at C:/Users/tdtra/Desktop/Method Stat/New Project/Method_Stat
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load the data}
+\KeywordTok{load}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{here}\NormalTok{(}\StringTok{"Data"}\NormalTok{, }\StringTok{"Market.rda"}\NormalTok{))}
+
+\CommentTok{\# Load the functions}
+\KeywordTok{source}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{here}\NormalTok{(}\StringTok{"Functions"}\NormalTok{, }\StringTok{"price\_BS.r"}\NormalTok{)) }\CommentTok{\# Option prices using the Black{-}Scholes formula}
+\KeywordTok{source}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{here}\NormalTok{(}\StringTok{"Functions"}\NormalTok{, }\StringTok{"lin\_inter.r"}\NormalTok{))  }\CommentTok{\# Linear interpolation of the interest rates}
+
+\CommentTok{\# Assign data to different variables}
+\NormalTok{vix       <{-}}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(Market}\OperatorTok{$}\NormalTok{vix)}
+\NormalTok{sp\_}\DecValTok{500}\NormalTok{    <{-}}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(Market}\OperatorTok{$}\NormalTok{sp500)}
+\NormalTok{calls     <{-}}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(Market}\OperatorTok{$}\NormalTok{calls)}
+\NormalTok{puts      <{-}}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(Market}\OperatorTok{$}\NormalTok{puts)}
+
+\CommentTok{\# Create a matrix \textquotesingle{}rates\textquotesingle{} with two columns: maturities and risk{-}free rates}
+\NormalTok{rates     <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \KeywordTok{length}\NormalTok{(Market}\OperatorTok{$}\NormalTok{rf), }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\NormalTok{rates[,}\DecValTok{1}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{((}\KeywordTok{attributes}\NormalTok{(Market}\OperatorTok{$}\NormalTok{rf))[[}\DecValTok{2}\NormalTok{]])}
+\NormalTok{rates[,}\DecValTok{2}\NormalTok{] <{-}}\StringTok{ }\NormalTok{Market}\OperatorTok{$}\NormalTok{rf}
+
+\CommentTok{\# Assign column names to \textquotesingle{}rates\textquotesingle{}}
+\KeywordTok{colnames}\NormalTok{(rates) <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Maturities"}\NormalTok{, }\StringTok{"Risk{-}free Rates"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{part-iii-pricing-a-portfolio-of-options}{%
+\section{Part III: Pricing a Portfolio of
+Options}\label{part-iii-pricing-a-portfolio-of-options}}
+
+The portfolio under consideration contains four options: K = 1600 and
+T-t = 20 days, K = 1650 and T-t = 20 days, K = 1750 and T-t = 40 days,
+and K = 1800 and T-t = 40 days. K is the strike price and T-t is days
+before maturity. We assume that there is 250 days in a year and thus
+convert times to expiry in years by dividing by 250. We first create a
+matrix `book' that contains information regarding the options in the
+portfolio.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create matrix}
+\NormalTok{book <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \DecValTok{4}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{6}\NormalTok{)}
+
+\CommentTok{\# Assign names to columns}
+\CommentTok{\# Option Type: Call = 1, Put = 0}
+\KeywordTok{colnames}\NormalTok{(book) <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Quantity"}\NormalTok{, }\StringTok{"Option Type"}\NormalTok{, }\StringTok{"Strike Price"}\NormalTok{, }\StringTok{"Maturity"}\NormalTok{, }\StringTok{"Option price"}\NormalTok{, }\StringTok{"Position Value"}\NormalTok{)}
+
+\CommentTok{\# Store initial values}
+\NormalTok{book[}\DecValTok{1}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1600}\NormalTok{, }\DecValTok{20} \OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{)}
+\NormalTok{book[}\DecValTok{2}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1650}\NormalTok{, }\DecValTok{20} \OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{)}
+\NormalTok{book[}\DecValTok{3}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1750}\NormalTok{, }\DecValTok{40} \OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{)}
+\NormalTok{book[}\DecValTok{4}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1800}\NormalTok{, }\DecValTok{40} \OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The next step is to use the most recent underlying asset price and VIX
+value as well as the interpolated risk-free rates to compute the price
+of each option in the portfolio. The value of the portfolio of options
+is simply the sum of each option's price multiplied by its quantity. To
+do this, we use two functions described below.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  `lin\_inter': Takes as input a maturity in years (360-day basis) and
+  outputs the associated rate. Uses linear interpolation with the given
+  term structure.
+\item
+  `price\_BS': Takes as inputs the underlying asset price, the option
+  strike price, the risk-free rate, the volatility, the maturity and the
+  option type. Uses Black-Scholes model to price options.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Number of observations}
+\NormalTok{n\_obs <{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(sp\_}\DecValTok{500}\NormalTok{)}
+
+\CommentTok{\# Convert 250{-}day basis year in 360{-}day basis year}
+\NormalTok{m <{-}}\StringTok{ }\NormalTok{book[,}\DecValTok{4}\NormalTok{]}\OperatorTok{*}\NormalTok{(}\DecValTok{250} \OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{)}
+
+\CommentTok{\# Interpolated interest rates}
+\NormalTok{rf <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(lin\_inter, m)}
+
+\CommentTok{\# Latest underlying asset price (spot price)}
+\NormalTok{S0 <{-}}\StringTok{ }\NormalTok{sp\_}\DecValTok{500}\NormalTok{[n\_obs]}
+\NormalTok{S <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ S0, }\DataTypeTok{nrow =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Latest VIX value}
+\NormalTok{Vol0 <{-}}\StringTok{ }\NormalTok{vix[n\_obs]}
+\NormalTok{Vol <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ Vol0, }\DataTypeTok{nrow =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Strike prices}
+\NormalTok{K <{-}}\StringTok{ }\NormalTok{book[,}\DecValTok{3}\NormalTok{]}
+
+\CommentTok{\# Maturities}
+\NormalTok{M <{-}}\StringTok{ }\NormalTok{book[,}\DecValTok{4}\NormalTok{]}
+
+\CommentTok{\# Option type}
+\NormalTok{Type <{-}}\StringTok{ }\NormalTok{book[,}\DecValTok{2}\NormalTok{]}
+
+\CommentTok{\# Compute the options values}
+\NormalTok{book[,}\DecValTok{5}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(price\_BS, S, K, rf, Vol, M, Type)}
+
+\CommentTok{\# Compute the value of the portfolio}
+\NormalTok{book[,}\DecValTok{6}\NormalTok{] <{-}}\StringTok{ }\NormalTok{book[,}\DecValTok{1}\NormalTok{]}\OperatorTok{*}\NormalTok{book[,}\DecValTok{5}\NormalTok{]}
+\NormalTok{PF\_val   <{-}}\StringTok{ }\KeywordTok{sum}\NormalTok{(book[,}\DecValTok{6}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## The total value of the Options Portfolio is 156.98$.
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Portfolio detail:
+\end{verbatim}
+
+\begin{verbatim}
+##      Quantity Option Type Strike Price Maturity Option price
+## [1,]    1.00     1.00     1600.00         0.08    87.57     
+## [2,]    1.00     1.00     1650.00         0.08    47.72     
+## [3,]    1.00     1.00     1750.00         0.16    15.30     
+## [4,]    1.00     1.00     1800.00         0.16     6.38     
+##      Position Value
+## [1,]   87.57       
+## [2,]   47.72       
+## [3,]   15.30       
+## [4,]    6.38
+\end{verbatim}
+
+It is not surprising to see that the value of the first option is higher
+than the value of the second option. Indeed, since the strike price is
+lower for the first option, the first option is deeper ITM than the
+second option and it should therefore have a higher price. The same
+reasoning applies to the third and fourth options.
+
+\hypertarget{part-iv-risk-model-1-one-risk-driver-and-gaussian-distribution}{%
+\section{Part IV: Risk Model 1: One Risk Driver and Gaussian
+Distribution}\label{part-iv-risk-model-1-one-risk-driver-and-gaussian-distribution}}
+
+We now want to estimate the value-at-risk (VaR) and the expected
+shortfall (ES) of this portfolio of options over the course of the
+following week. To do so, we must first compute the underlying asset log
+returns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Daily underlying asset log returns}
+\NormalTok{log\_return <{-}}\StringTok{ }\KeywordTok{diff}\NormalTok{(}\KeywordTok{log}\NormalTok{(sp\_}\DecValTok{500}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Next, we assume that the underlying asset log returns follow a normal
+distribution. The normal distribution parameters can be found by
+computing the empirical mean and standard deviation of the underlying
+asset daily log returns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Number of log returns}
+\NormalTok{n\_ret <{-}}\StringTok{ }\KeywordTok{length}\NormalTok{(log\_return)}
+
+\CommentTok{\# Calibration}
+\NormalTok{mu\_hat\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{mean}\NormalTok{(log\_return)}
+\NormalTok{s2\_hat\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{var}\NormalTok{(log\_return)}
+\NormalTok{sd\_hat\_}\DecValTok{1}\NormalTok{  <{-}}\StringTok{ }\NormalTok{s2\_hat\_}\DecValTok{1}\OperatorTok{\^{}}\FloatTok{0.5}
+
+\CommentTok{\# Store parameters in \textquotesingle{}theta\_1\textquotesingle{}}
+\NormalTok{theta\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(mu\_hat\_}\DecValTok{1}\NormalTok{, sd\_hat\_}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Now that we have estimated the parameters of the underlying asset return
+log returns, we can run a simulation of the underlying asset price one
+week ahead by generating normally distributed IID shocks with mean
+`mu\_hat' and standard deviation `sd\_hat'. Since we found the
+distribution parameters using daily log returns, we generate five shocks
+per simulation and sum these shocks to obtain the overall shock over one
+week. We fix the size of the simulation to 10 000.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Number of simulation}
+\NormalTok{H <{-}}\StringTok{ }\DecValTok{10000}
+
+\CommentTok{\# Number of days between now and the forecast horizon}
+\NormalTok{t <{-}}\StringTok{ }\DecValTok{5}
+
+\CommentTok{\# Use set seed for testing purpose? Yes (1), No (0).}
+\KeywordTok{source}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{here}\NormalTok{(}\StringTok{"Functions"}\NormalTok{, }\StringTok{"seed.r"}\NormalTok{))}
+\NormalTok{use\_set\_seed <{-}}\StringTok{ }\DecValTok{1}
+\KeywordTok{seed}\NormalTok{(use\_set\_seed)}
+
+\CommentTok{\# Store in \textquotesingle{}sim\_ret\_1\textquotesingle{} normally distributed IID shocks with mean \textquotesingle{}mu\_hat\textquotesingle{} and standard deviation \textquotesingle{}sd\_hat\textquotesingle{}}
+\NormalTok{sim\_ret\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rnorm}\NormalTok{(t }\OperatorTok{*}\StringTok{ }\NormalTok{H, }\DataTypeTok{mean =}\NormalTok{ theta\_}\DecValTok{1}\NormalTok{[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta\_}\DecValTok{1}\NormalTok{[}\DecValTok{2}\NormalTok{]), }\DataTypeTok{nrow =}\NormalTok{ H, }\DataTypeTok{ncol =}\NormalTok{ t)}
+
+\CommentTok{\# Histogram of the simulated returns}
+\KeywordTok{hist}\NormalTok{(sim\_ret\_}\DecValTok{1}\NormalTok{[,}\DecValTok{5}\NormalTok{], }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(sim\_ret\_}\DecValTok{1}\NormalTok{))),}
+                \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{,}
+                \DataTypeTok{main =} \StringTok{"Histogram of 10 000 Simulated Returns"}\NormalTok{,}
+                \DataTypeTok{xlab =} \StringTok{"Simulated Returns"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+In order to obtain the underlying asset price one week from now, we
+simply have to compute the exponential sum of the five daily normally
+distributed IID shocks per trajectory and multiply by the latest
+underlying asset price. The last things we need to modify are the
+risk-free rate for the remaining life of the option and the remaining
+days of the option. The strike price does not change over the option
+life and the volatility is assumed to be constant.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the price of the underlying asset one week from now}
+\NormalTok{sim\_S\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\NormalTok{S0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(sim\_ret\_}\DecValTok{1}\NormalTok{))}
+
+\CommentTok{\# Update the risk{-}free rate (360{-}day basis year)}
+\NormalTok{rf\_m\_t <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(lin\_inter, (m }\OperatorTok{{-}}\StringTok{ }\NormalTok{t }\OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{))}
+
+\CommentTok{\# Initialize a matrix to store call prices (10 000 rows (1 per simulation), 4 columns (1 per option))}
+\NormalTok{sim\_price\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ H, }\DataTypeTok{ncol =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Loop through H simulations and price the options}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H)\{}
+\NormalTok{  sim\_price\_}\DecValTok{1}\NormalTok{[i,] <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(price\_BS, sim\_S\_}\DecValTok{1}\NormalTok{[i], K, rf\_m\_t, Vol, M }\OperatorTok{{-}}\StringTok{ }\NormalTok{t }\OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{, Type)}
+\NormalTok{\}}
+
+\CommentTok{\# Histogram of the simulated prices}
+\KeywordTok{hist}\NormalTok{(sim\_S\_}\DecValTok{1}\NormalTok{, }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(sim\_S\_}\DecValTok{1}\NormalTok{))),}
+              \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\DecValTok{1500}\NormalTok{,}\DecValTok{1900}\NormalTok{),}
+              \DataTypeTok{main =} \StringTok{"Histogram of 10 000 Simulated Prices in 5 days"}\NormalTok{,}
+              \DataTypeTok{xlab =} \StringTok{"Simulated Prices"}\NormalTok{)}
+
+\CommentTok{\# Add a verticale line that represents the spot price}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v   =}\NormalTok{ S0,}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{,}
+       \DataTypeTok{lwd =} \FloatTok{2.5}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+For each replication, we can compute the value of the portfolio of
+options. Recall that we want to estimate the VaR and the ES of this
+portfolio of options over the course of the following week. Therefore,
+for each replication, we must compute a P\&L by discounting at the
+risk-free rate the value of the portfolio of options one week from now
+and subtracting the value of the portfolio observed today.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the price of the portfolio for each replication and store it in \textquotesingle{}PF\_val\_1\textquotesingle{}}
+\NormalTok{PF\_val\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(sim\_price\_}\DecValTok{1} \OperatorTok{*}\StringTok{ }\NormalTok{book[,}\DecValTok{1}\NormalTok{])}
+
+\CommentTok{\# Histogram of portfolio\textquotesingle{}s value}
+\KeywordTok{hist}\NormalTok{(PF\_val\_}\DecValTok{1}\NormalTok{, }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(PF\_val\_}\DecValTok{1}\NormalTok{))),}
+               \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{700}\NormalTok{),}
+               \DataTypeTok{main =} \StringTok{"Histogram of 10 000 simulated portfolios value"}\NormalTok{,}
+               \DataTypeTok{xlab =} \StringTok{"Simulated portfolios values"}\NormalTok{)}
+
+\CommentTok{\# Add a vertical that represent last portfolio\textquotesingle{}s value}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v   =}\NormalTok{ PF\_val,}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{,}
+       \DataTypeTok{lwd =} \FloatTok{2.5}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"blue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+Based on the histogram of the simulated portfolio values, we notice that
+the porfolio of options as a function of underlying asset price at t = 0
+is right skewed. Call option prices are therefore more sensitive to a
+rise in the price of the underlying asset rather than a decline.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the risk{-}free rate for a period of 5 days (360{-}day basis year)}
+\NormalTok{rf\_t <{-}}\StringTok{ }\KeywordTok{lin\_inter}\NormalTok{(t }\OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{)}
+
+\CommentTok{\# Compute the P\&L}
+\NormalTok{PL\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\NormalTok{PF\_val\_}\DecValTok{1} \OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{{-}}\NormalTok{(t }\OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{rf\_t) }\OperatorTok{{-}}\StringTok{ }\NormalTok{PF\_val}
+\end{Highlighting}
+\end{Shaded}
+
+The last step is to compute the VaR and the ES of the portfolio of
+options P\&L distribution. In order to do so, we sort the P\&L values in
+ascending order and identify the (1-alpha)-quartile of the empirical
+distribution for the VaR, where alpha is the risk level (in our case,
+0.95). The ES is simply the mean of the P\&L values smaller than the
+VaR.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Set alpha to a desired significance level}
+\NormalTok{alpha <{-}}\StringTok{ }\FloatTok{0.95}
+
+\CommentTok{\# Compute the VaR and the ES of the P\&L distribution}
+\NormalTok{VaR\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{1}\NormalTok{)[(}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H]}
+\NormalTok{ES\_}\DecValTok{1}\NormalTok{  <{-}}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{1}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\NormalTok{((}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H)])}
+
+\CommentTok{\# Plot an histogram}
+\KeywordTok{hist}\NormalTok{(PL\_}\DecValTok{1}\NormalTok{, }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(PL\_}\DecValTok{1}\NormalTok{))), }
+           \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\OperatorTok{{-}}\DecValTok{200}\NormalTok{,}\DecValTok{600}\NormalTok{),}
+           \DataTypeTok{main =} \StringTok{"Histogram of 10 000 simulated PL\_1"}\NormalTok{)}
+
+\CommentTok{\# Add a vertical line to show the VaR}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v   =} \KeywordTok{quantile}\NormalTok{(PL\_}\DecValTok{1}\NormalTok{, }\DataTypeTok{probs =}\NormalTok{ (}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha)),}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{,}
+       \DataTypeTok{lwd =} \FloatTok{2.5}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+\begin{verbatim}
+## The value at risk at alpha 0.95 is -122.24$.
+\end{verbatim}
+
+\begin{verbatim}
+## The expected shortfall at alpha 0.95 is -134.80$.
+\end{verbatim}
+
+\hypertarget{analysis-portfolio-drivers}{%
+\subsection{Analysis portfolio
+drivers}\label{analysis-portfolio-drivers}}
+
+This section explain what drive the portfolio price: What drive
+portfolio value is the inputs of our models (BlackShcole formula).
+Strike price and volatility are constants, risk-free rate is stable. So
+distribution of the portfolio value can be explained by price of
+underlying asset and days remaining until maturity.
+
+Porfolio value is right skewed due to the relationship between calls
+value and underlying price at t = 0.
+
+Here we observe the value of the calls and the portfolio of the calls 5
+days later. We isolated the change in portfolio value due to days until
+maturity change only i.e.~without change in the underlying asset price,
+volatility and risk-free rate.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{day\_s =}\StringTok{ }\DecValTok{5}\OperatorTok{/}\DecValTok{250}
+\NormalTok{book\_5day\_later      <{-}}\StringTok{ }\NormalTok{book[,}\DecValTok{1}\OperatorTok{:}\DecValTok{6}\NormalTok{]}
+\NormalTok{book\_5day\_later[,}\DecValTok{4}\NormalTok{]  <{-}}\StringTok{ }\NormalTok{book[,}\DecValTok{4}\NormalTok{] }\OperatorTok{{-}}\StringTok{ }\NormalTok{day\_s}
+
+\NormalTok{book\_5day\_later[,}\DecValTok{5}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(price\_BS, S, K, rf, Vol, M }\OperatorTok{{-}}\StringTok{ }\NormalTok{day\_s, Type)}
+\NormalTok{book\_5day\_later[,}\DecValTok{6}\NormalTok{] <{-}}\StringTok{ }\NormalTok{book\_5day\_later[,}\DecValTok{1}\NormalTok{]}\OperatorTok{*}\NormalTok{book\_5day\_later[,}\DecValTok{5}\NormalTok{]}
+
+\NormalTok{PF\_val\_M\_choc <{-}}\StringTok{ }\KeywordTok{sum}\NormalTok{(book\_5day\_later[,}\DecValTok{6}\NormalTok{])}
+
+\NormalTok{M\_choc <{-}}\StringTok{ }\NormalTok{PF\_val\_M\_choc }\OperatorTok{{-}}\StringTok{ }\NormalTok{PF\_val}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Calls value and maturity usually have positive relationship, and we can observe that 5 days in less until maturity lower
+\end{verbatim}
+
+\begin{verbatim}
+## portfolio value by 8.06$.
+\end{verbatim}
+
+Summary of P\&L distribution and it's drivers
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Portfolio price and underlying price have positive relationship
+\item
+  P\&L is right skewed because of the relationship between Calls value
+  and underlying asset price at t = 0
+\item
+  Portfolio value is more sensible to a positive change in uderlying
+  asset price than a negative one
+\item
+  5 days in less until maturity make the portolio loose 8.06\$ in value
+  (for a same underlying asset price)
+\end{enumerate}
+
+\hypertarget{part-v-risk-model-2-two-risk-drivers-and-gaussian-distribution}{%
+\section{Part V: Risk Model 2: Two Risk Drivers and Gaussian
+Distribution}\label{part-v-risk-model-2-two-risk-drivers-and-gaussian-distribution}}
+
+The biggest assumption of the Risk Model 1 is that the volatility is
+assumed constant between now and the following week. In practice,
+volatility is not constant as evidenced by the time series of the VIX
+index as a function of time. To account for this, we allow volatility to
+vary in Risk Model 2. More specifically, we model the dynamics of the
+underlying asset price and volatility with a multivariate normal
+distribution that we calibrate using the S\&P500 and VIX log returns.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# install.packages("MASS")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"MASS"}\NormalTok{)}
+
+\CommentTok{\# Daily VIX log returns}
+\NormalTok{vix\_return <{-}}\StringTok{ }\KeywordTok{diff}\NormalTok{(}\KeywordTok{log}\NormalTok{(vix))}
+
+\CommentTok{\# Store underlying asset log returns and VIX log returns in \textquotesingle{}rets\textquotesingle{}}
+\NormalTok{rets\_}\DecValTok{2}\NormalTok{     <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ n\_ret, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)}
+\NormalTok{rets\_}\DecValTok{2}\NormalTok{[,}\DecValTok{1}\NormalTok{] <{-}}\StringTok{ }\NormalTok{log\_return}
+\NormalTok{rets\_}\DecValTok{2}\NormalTok{[,}\DecValTok{2}\NormalTok{] <{-}}\StringTok{ }\NormalTok{vix\_return}
+
+\CommentTok{\# Calibration}
+\NormalTok{mu\_hat\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{colMeans}\NormalTok{(rets\_}\DecValTok{2}\NormalTok{)}
+\NormalTok{sg\_hat\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\NormalTok{((n\_ret }\OperatorTok{{-}}\StringTok{ }\DecValTok{1}\NormalTok{) }\OperatorTok{/}\StringTok{ }\NormalTok{n\_ret) }\OperatorTok{*}\StringTok{ }\KeywordTok{cov}\NormalTok{(rets\_}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{\# Store parameters in \textquotesingle{}theta\_2\textquotesingle{}}
+\NormalTok{theta\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{mu =}\NormalTok{ mu\_hat\_}\DecValTok{2}\NormalTok{, }\DataTypeTok{sigma =}\NormalTok{ sg\_hat\_}\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+We run a simulation of the underlying asset price and volatility index
+value one week from now and re-price our portfolio of options in each
+scenario.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Initialize the array \textquotesingle{}sim\_ret\_2\textquotesingle{}}
+\NormalTok{sim\_ret\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{array}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{dim =} \KeywordTok{c}\NormalTok{(H, }\DecValTok{2}\NormalTok{, t))}
+
+\CommentTok{\# Set seed for generating pseudo{-}random numbers}
+\KeywordTok{seed}\NormalTok{(use\_set\_seed)}
+
+\CommentTok{\# Store in \textquotesingle{}sim\_ret\_2\textquotesingle{} daily shocks from a multivariate normal distribution with parameters \textquotesingle{}theta\_2\textquotesingle{}}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{t) \{}
+\NormalTok{  sim\_ret\_}\DecValTok{2}\NormalTok{[,,i] <{-}}\StringTok{ }\KeywordTok{mvrnorm}\NormalTok{(}\DataTypeTok{n =}\NormalTok{ H, }\DataTypeTok{mu =}\NormalTok{ theta\_}\DecValTok{2}\OperatorTok{$}\NormalTok{mu, }\DataTypeTok{Sigma =}\NormalTok{ theta\_}\DecValTok{2}\OperatorTok{$}\NormalTok{sigma)}
+\NormalTok{\}}
+
+\CommentTok{\# Initialize two vectors that contain the underlying asset price and the VIX value one week from now}
+\NormalTok{sim\_S\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\OtherTok{NA}\NormalTok{, H)}
+\NormalTok{sim\_vol\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\OtherTok{NA}\NormalTok{, H)}
+
+\CommentTok{\# Compute the underlying asset price and the VIX value one week from now}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H) \{}
+\NormalTok{  sim\_S\_}\DecValTok{2}\NormalTok{[i] <{-}}\StringTok{ }\NormalTok{S0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{sum}\NormalTok{(sim\_ret\_}\DecValTok{2}\NormalTok{[i,}\DecValTok{1}\NormalTok{,]))}
+\NormalTok{  sim\_vol\_}\DecValTok{2}\NormalTok{[i] <{-}}\StringTok{ }\NormalTok{Vol0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{sum}\NormalTok{(sim\_ret\_}\DecValTok{2}\NormalTok{[i,}\DecValTok{2}\NormalTok{,]))}
+\NormalTok{\}}
+
+\CommentTok{\# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))}
+\NormalTok{sim\_price\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ H, }\DataTypeTok{ncol =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Loop through H simulations and price each option}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H)\{}
+\NormalTok{  sim\_price\_}\DecValTok{2}\NormalTok{[i,] <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(price\_BS, sim\_S\_}\DecValTok{2}\NormalTok{[i], K, rf\_m\_t, sim\_vol\_}\DecValTok{2}\NormalTok{[i], M }\OperatorTok{{-}}\StringTok{ }\NormalTok{t }\OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{, Type)}
+\NormalTok{\}}
+
+\CommentTok{\# Compute the price of the portfolio for each replication and store it in \textquotesingle{}PF\_val\_2\textquotesingle{}}
+\NormalTok{PF\_val\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(sim\_price\_}\DecValTok{2} \OperatorTok{*}\StringTok{ }\NormalTok{book[,}\DecValTok{1}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+Finally, we plot the P\&L distribution.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the P\&L}
+\NormalTok{PL\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\NormalTok{PF\_val\_}\DecValTok{2} \OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{{-}}\NormalTok{(t }\OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{rf\_t) }\OperatorTok{{-}}\StringTok{ }\NormalTok{PF\_val}
+
+\CommentTok{\# Compute the VaR and the ES of the P\&L distribution}
+\NormalTok{VaR\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{2}\NormalTok{)[(}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H]}
+\NormalTok{ES\_}\DecValTok{2}\NormalTok{  <{-}}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{2}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\NormalTok{((}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H)])}
+
+\CommentTok{\# Plot an histogram}
+\KeywordTok{hist}\NormalTok{(PL\_}\DecValTok{2}\NormalTok{, }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(PL\_}\DecValTok{2}\NormalTok{))), }
+           \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\OperatorTok{{-}}\DecValTok{200}\NormalTok{,}\DecValTok{600}\NormalTok{),}
+           \DataTypeTok{main =} \StringTok{"Histogram of 10 000 simulated PL\_2"}\NormalTok{)}
+
+\CommentTok{\# Add a vertical line to show the VaR}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v   =} \KeywordTok{quantile}\NormalTok{(PL\_}\DecValTok{2}\NormalTok{, }\DataTypeTok{probs =}\NormalTok{ (}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha)),}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{,}
+       \DataTypeTok{lwd =} \FloatTok{2.5}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\begin{verbatim}
+## The value at risk at alpha 0.95 is -111.69$.
+\end{verbatim}
+
+\begin{verbatim}
+## The expected shortfall at alpha 0.95 is -124.36$.
+\end{verbatim}
+
+Compared to Risk Model 1, Risk Model 2 has a higher (better) VaR and a
+higher (better) ES for alpha = 0.95. This is not surprising knowing that
+the correlation between the underlying asset log returns and the VIX log
+returns is negative:
+
+\begin{verbatim}
+## The correlation between the S&P 500 and the VIX is -0.7537
+\end{verbatim}
+
+Since the value of a call option increases as the underlying asset and
+volatility rise, and because these two variables are negatively
+correlated, they have an offsetting effect on the value of a call
+option. As a result, our portfolio of call options is less risky and has
+a higher VaR.
+
+\hypertarget{part-vi-risk-model-3-two-risk-drivers-and-copula-marginal-model-student-t-and-gaussian-copula}{%
+\section{Part VI: Risk Model 3: Two Risk Drivers and Copula-Marginal
+Model (Student-t and Gaussian
+Copula)}\label{part-vi-risk-model-3-two-risk-drivers-and-copula-marginal-model-student-t-and-gaussian-copula}}
+
+We add another layer on top of what we built up to now by introducing a
+Gaussian copula in the mix. The copula models the dependence structure
+of the two marginal distributions. In this case, we assume that the
+marginals are student-t distributions with 10 degrees of freedom for the
+underlying asset price and 5 degrees of freedom for the volatility.
+
+The first step in implementing Risk Model 3 is to calibrate the two
+marginal distributions using a similar methodology than previously
+discussed.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# install.packages("copula")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"copula"}\NormalTok{)}
+
+\CommentTok{\# install.packages("fGarch")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"fGarch"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: timeDate
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: timeSeries
+\end{verbatim}
+
+\begin{verbatim}
+## Loading required package: fBasics
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load the function}
+\KeywordTok{source}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{here}\NormalTok{(}\StringTok{"Functions"}\NormalTok{, }\StringTok{"nll\_student.r"}\NormalTok{)) }\CommentTok{\# Computes the negative log{-}likelihood function}
+
+\CommentTok{\# Define an initial vector of parameters for the underlying asset log returns}
+\NormalTok{theta\_}\DecValTok{0}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\KeywordTok{mean}\NormalTok{(log\_return), }\KeywordTok{sd}\NormalTok{(log\_return), }\DecValTok{10}\NormalTok{)}
+
+\CommentTok{\# Calibrate the student{-}t distribution on the underlying asset log returns}
+\NormalTok{tmp <{-}}\StringTok{ }\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par =}\NormalTok{ theta\_}\DecValTok{0}\NormalTok{,}
+             \DataTypeTok{fn =}\NormalTok{ nll\_student,}
+             \DataTypeTok{method =} \StringTok{"L{-}BFGS{-}B"}\NormalTok{,}
+             \DataTypeTok{lower =} \KeywordTok{c}\NormalTok{(}\OperatorTok{{-}}\OtherTok{Inf}\NormalTok{, }\FloatTok{1e{-}5}\NormalTok{, }\DecValTok{10}\NormalTok{),}
+             \DataTypeTok{x =}\NormalTok{ log\_return)}
+
+\CommentTok{\# Store parameters in \textquotesingle{}theta\_S\_3\textquotesingle{}}
+\NormalTok{theta\_S\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\NormalTok{tmp}\OperatorTok{$}\NormalTok{par}
+
+\CommentTok{\# Define an initial vector of parameters for the VIX log returns}
+\NormalTok{theta\_}\DecValTok{0}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\KeywordTok{mean}\NormalTok{(vix\_return), }\KeywordTok{sd}\NormalTok{(vix\_return), }\DecValTok{5}\NormalTok{)}
+
+\CommentTok{\# Calibrate the student{-}t distribution on the VIX log returns}
+\NormalTok{tmp <{-}}\StringTok{ }\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par =}\NormalTok{ theta\_}\DecValTok{0}\NormalTok{,}
+             \DataTypeTok{fn =}\NormalTok{ nll\_student,}
+             \DataTypeTok{method =} \StringTok{"L{-}BFGS{-}B"}\NormalTok{,}
+             \DataTypeTok{lower =} \KeywordTok{c}\NormalTok{(}\OperatorTok{{-}}\OtherTok{Inf}\NormalTok{, }\FloatTok{1e{-}5}\NormalTok{, }\DecValTok{5}\NormalTok{),}
+             \DataTypeTok{x =}\NormalTok{ vix\_return)}
+
+\CommentTok{\# Store parameters in \textquotesingle{}theta\_vol\_3\textquotesingle{}}
+\NormalTok{theta\_vol\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\NormalTok{tmp}\OperatorTok{$}\NormalTok{par}
+\end{Highlighting}
+\end{Shaded}
+
+The second step in implementing Risk Model 3 is to use the probability
+integral transformation theorem to obtain random variables that follow a
+uniform distribution for both the underlying asset and the volatility
+from their respective cumulative distribution function. We call these
+variables `U\_1' and `U\_2' and use them to calibrate the Gaussian
+copula.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute \textquotesingle{}U\_1\textquotesingle{} and \textquotesingle{}U\_2\textquotesingle{} and combine these two variables in \textquotesingle{}U\textquotesingle{}}
+\NormalTok{U\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{pstd}\NormalTok{(log\_return, }\DataTypeTok{mean =}\NormalTok{ theta\_S\_}\DecValTok{3}\NormalTok{[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta\_S\_}\DecValTok{3}\NormalTok{[}\DecValTok{2}\NormalTok{], }\DataTypeTok{nu =}\NormalTok{ theta\_S\_}\DecValTok{3}\NormalTok{[}\DecValTok{3}\NormalTok{])}
+\NormalTok{U\_}\DecValTok{2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{pstd}\NormalTok{(vix\_return, }\DataTypeTok{mean =}\NormalTok{ theta\_vol\_}\DecValTok{3}\NormalTok{[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta\_vol\_}\DecValTok{3}\NormalTok{[}\DecValTok{2}\NormalTok{], }\DataTypeTok{nu =}\NormalTok{ theta\_vol\_}\DecValTok{3}\NormalTok{[}\DecValTok{3}\NormalTok{])}
+\NormalTok{U   <{-}}\StringTok{ }\KeywordTok{cbind}\NormalTok{(U\_}\DecValTok{1}\NormalTok{, U\_}\DecValTok{2}\NormalTok{)}
+
+\CommentTok{\# Calibrate a Gaussian copula}
+\NormalTok{C   <{-}}\StringTok{ }\KeywordTok{normalCopula}\NormalTok{(}\DataTypeTok{dim =} \DecValTok{2}\NormalTok{)}
+\NormalTok{fit <{-}}\StringTok{ }\KeywordTok{fitCopula}\NormalTok{(C, }\DataTypeTok{data =}\NormalTok{ U, }\DataTypeTok{method =} \StringTok{"ml"}\NormalTok{)}
+
+\CommentTok{\# Set seed for generating pseudo{-}random numbers}
+\KeywordTok{seed}\NormalTok{(use\_set\_seed)}
+
+\NormalTok{sim\_U       <{-}}\StringTok{ }\KeywordTok{rCopula}\NormalTok{(H }\OperatorTok{*}\StringTok{ }\NormalTok{t, fit}\OperatorTok{@}\NormalTok{copula)}
+\NormalTok{sim\_log\_ret <{-}}\StringTok{ }\KeywordTok{qstd}\NormalTok{(sim\_U[,}\DecValTok{1}\NormalTok{], }\DataTypeTok{mean =}\NormalTok{ theta\_S\_}\DecValTok{3}\NormalTok{[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta\_S\_}\DecValTok{3}\NormalTok{[}\DecValTok{2}\NormalTok{], }\DataTypeTok{nu =}\NormalTok{ theta\_S\_}\DecValTok{3}\NormalTok{[}\DecValTok{3}\NormalTok{])}
+\NormalTok{sim\_vix\_ret <{-}}\StringTok{ }\KeywordTok{qstd}\NormalTok{(sim\_U[,}\DecValTok{2}\NormalTok{], }\DataTypeTok{mean =}\NormalTok{ theta\_vol\_}\DecValTok{3}\NormalTok{[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta\_vol\_}\DecValTok{3}\NormalTok{[}\DecValTok{2}\NormalTok{], }\DataTypeTok{nu =}\NormalTok{ theta\_vol\_}\DecValTok{3}\NormalTok{[}\DecValTok{3}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+We run a simulation of the underlying asset price and volatility index
+value one week from now and re-price our portfolio of options in each
+scenario.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Initialize the array \textquotesingle{}sim\_ret\_3\textquotesingle{}}
+\NormalTok{sim\_ret\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{array}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{dim =} \KeywordTok{c}\NormalTok{(H, }\DecValTok{2}\NormalTok{, t))}
+
+\CommentTok{\# Store in \textquotesingle{}sim\_ret\_3\textquotesingle{} daily log returns for the underlying asset and the VIX}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{t) \{}
+\NormalTok{  sim\_ret\_}\DecValTok{3}\NormalTok{[,,i] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(sim\_log\_ret[(H }\OperatorTok{*}\StringTok{ }\NormalTok{(i }\OperatorTok{{-}}\StringTok{ }\DecValTok{1}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{(H }\OperatorTok{*}\StringTok{ }\NormalTok{i)], sim\_vix\_ret[(H }\OperatorTok{*}\StringTok{ }\NormalTok{(i }\OperatorTok{{-}}\StringTok{ }\DecValTok{1}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{(H }\OperatorTok{*}\StringTok{ }\NormalTok{i)])}
+\NormalTok{\}}
+
+\CommentTok{\# Initialize two vectors that contain the underlying asset price and the VIX value one week from now}
+\NormalTok{sim\_S\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\OtherTok{NA}\NormalTok{, H)}
+\NormalTok{sim\_vol\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\OtherTok{NA}\NormalTok{, H)}
+
+\CommentTok{\# Compute the underlying asset price and the VIX value one week from now}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H) \{}
+\NormalTok{  sim\_S\_}\DecValTok{3}\NormalTok{[i]   <{-}}\StringTok{ }\NormalTok{S0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{sum}\NormalTok{(sim\_ret\_}\DecValTok{3}\NormalTok{[i,}\DecValTok{1}\NormalTok{,]))}
+\NormalTok{  sim\_vol\_}\DecValTok{3}\NormalTok{[i] <{-}}\StringTok{ }\NormalTok{Vol0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{sum}\NormalTok{(sim\_ret\_}\DecValTok{3}\NormalTok{[i,}\DecValTok{2}\NormalTok{,]))}
+\NormalTok{\}}
+
+\CommentTok{\# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))}
+\NormalTok{sim\_price\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ H, }\DataTypeTok{ncol =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Loop through H simulations and price each option}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H)\{}
+\NormalTok{  sim\_price\_}\DecValTok{3}\NormalTok{[i,] <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(price\_BS, sim\_S\_}\DecValTok{3}\NormalTok{[i], K, rf\_m\_t, sim\_vol\_}\DecValTok{3}\NormalTok{[i], M }\OperatorTok{{-}}\StringTok{ }\NormalTok{t }\OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{, Type)}
+\NormalTok{\}}
+
+\CommentTok{\# Compute the price of the portfolio for each replication and store it in \textquotesingle{}PF\_val\_3\textquotesingle{}}
+\NormalTok{PF\_val\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(sim\_price\_}\DecValTok{3} \OperatorTok{*}\StringTok{ }\NormalTok{book[,}\DecValTok{1}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+We plot the P\&L distribution, as we did in previous parts.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the P\&L}
+\NormalTok{PL\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\NormalTok{PF\_val\_}\DecValTok{3} \OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{{-}}\NormalTok{(t }\OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{rf\_t) }\OperatorTok{{-}}\StringTok{ }\NormalTok{PF\_val}
+
+\CommentTok{\# Compute the VaR and the ES of the P\&L distribution}
+\NormalTok{VaR\_}\DecValTok{3}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{3}\NormalTok{)[(}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H]}
+\NormalTok{ES\_}\DecValTok{3}\NormalTok{  <{-}}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{3}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\NormalTok{((}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H)])}
+
+\CommentTok{\# Plot an histogram}
+\KeywordTok{hist}\NormalTok{(PL\_}\DecValTok{3}\NormalTok{, }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(PL\_}\DecValTok{3}\NormalTok{))), }
+           \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\OperatorTok{{-}}\DecValTok{200}\NormalTok{,}\DecValTok{600}\NormalTok{),}
+           \DataTypeTok{main =} \StringTok{"Histogram of 10 000 simulated PL\_3"}\NormalTok{)}
+
+\CommentTok{\# Add a vertical line to show the VaR}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v   =} \KeywordTok{quantile}\NormalTok{(PL\_}\DecValTok{3}\NormalTok{, }\DataTypeTok{probs =}\NormalTok{ (}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha)),}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{,}
+       \DataTypeTok{lwd =} \FloatTok{2.5}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+\begin{verbatim}
+## The value at risk at alpha 0.95 is -98.67$.
+\end{verbatim}
+
+\begin{verbatim}
+## The expected shortfall at alpha 0.95 is -112.77$.
+\end{verbatim}
+
+Compared to Risk Model 1 and Risk Model 2, Risk Model 3 has the smallest
+VaR and the smallest ES for alpha = 0.95. As it was the case with Risk
+Model 2, we account for the fact that the underlying asset price and the
+volatility are negatively correlated. On top of that, we use the
+Gaussian copula to model the dependence structure of the two marginal
+distributions. The Gaussian copula underestimates the likelihood of
+extreme negative events in the tail of the distributions.
+
+\hypertarget{part-vii-risk-model-4-volatility-surface}{%
+\section{Part VII: Risk Model 4: Volatility
+Surface}\label{part-vii-risk-model-4-volatility-surface}}
+
+In this section, we take a slightly different approach than with
+previous risk models. Indeed, we fit a volatility surface on implied
+volatilities of traded call and put options using the parametric model
+described in the assignment.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load the functions}
+\KeywordTok{source}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{here}\NormalTok{(}\StringTok{"Functions"}\NormalTok{, }\StringTok{"vol\_surface.R"}\NormalTok{))   }\CommentTok{\# Implied volatility of an option}
+\KeywordTok{source}\NormalTok{(}\DataTypeTok{file =} \KeywordTok{here}\NormalTok{(}\StringTok{"Functions"}\NormalTok{, }\StringTok{"vol\_calibrate.r"}\NormalTok{)) }\CommentTok{\# Sum of absolute deviations of implied volalities}
+
+\NormalTok{calls <{-}}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(Market}\OperatorTok{$}\NormalTok{calls)}
+\NormalTok{puts  <{-}}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(Market}\OperatorTok{$}\NormalTok{puts)}
+                   
+\CommentTok{\# Count the number of traded options}
+\NormalTok{nb\_opts <{-}}\StringTok{ }\KeywordTok{nrow}\NormalTok{(calls) }\OperatorTok{+}\StringTok{ }\KeywordTok{nrow}\NormalTok{(puts)}
+
+\CommentTok{\# Build a matrix that contains the information relevant to traded call and put options}
+\NormalTok{mkt\_vol <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ nb\_opts, }\DataTypeTok{ncol =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Assign names to columns}
+\KeywordTok{colnames}\NormalTok{(mkt\_vol) <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"S"}\NormalTok{, }\StringTok{"K"}\NormalTok{, }\StringTok{"tau"}\NormalTok{, }\StringTok{"IV"}\NormalTok{)}
+
+\CommentTok{\# Latest underlying asset price (spot price)}
+\NormalTok{mkt\_vol[,}\DecValTok{1}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ S0, nb\_opts)}
+
+\CommentTok{\# Strike price of options}
+\NormalTok{mkt\_vol[,}\DecValTok{2}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(calls[,}\DecValTok{1}\NormalTok{], puts[,}\DecValTok{1}\NormalTok{])}
+
+\CommentTok{\# Time to expiry of options}
+\NormalTok{mkt\_vol[,}\DecValTok{3}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(calls[,}\DecValTok{2}\NormalTok{], puts[,}\DecValTok{2}\NormalTok{])}
+
+\CommentTok{\# Implied volatility of options}
+\NormalTok{mkt\_vol[,}\DecValTok{4}\NormalTok{] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(calls[,}\DecValTok{3}\NormalTok{], puts[,}\DecValTok{3}\NormalTok{])}
+
+\CommentTok{\# Set a vector of initial values of a1, a2, a3, and a4}
+\NormalTok{x0 <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\FloatTok{0.2}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\FloatTok{0.1}\NormalTok{)}
+
+\CommentTok{\# Calibrate the volatility surface on traded options}
+\NormalTok{tmp <{-}}\StringTok{ }\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par =}\NormalTok{ x0, }\DataTypeTok{fn =}\NormalTok{ vol\_calibrate)}
+
+\CommentTok{\# Store parameters in \textquotesingle{}theta\_vol\textquotesingle{}}
+\NormalTok{theta\_vol <{-}}\StringTok{ }\NormalTok{tmp}\OperatorTok{$}\NormalTok{par}
+\end{Highlighting}
+\end{Shaded}
+
+We have a plot for the volatility surface. To reduce computation time,
+we put it in comments.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#install.packages("rgl")}
+\CommentTok{\#library("rgl")}
+
+\CommentTok{\# Generate a sequence of strike price and time to expiry}
+\CommentTok{\#x1 <{-} S0 * seq(0.5, 1.5, (1.5 {-} 0.5) / 1000)}
+\CommentTok{\#x2 <{-} seq(0.01, 2, (2 {-} 0.01) / 1000)}
+
+\CommentTok{\# Generate al possible combinations of \textquotesingle{}x1\textquotesingle{} and \textquotesingle{}x2\textquotesingle{}}
+\CommentTok{\#x3 <{-} expand.grid(x1,x2)}
+
+\CommentTok{\# Compute the implied volatility for each combination}
+\CommentTok{\#y  <{-} vol\_surface(S0, x3[,1], x3[,2], theta\_vol[1], theta\_vol[2], theta\_vol[3], theta\_vol[4])}
+
+\CommentTok{\# Create a 3D{-}plot of the fitted volatility surface}
+\CommentTok{\# plot3d(x3[,1], x3[,2], y)}
+\end{Highlighting}
+\end{Shaded}
+
+Now that we have estimated the parameters that describe the shape of the
+volatility surface observed at t = 0, we can compute the ATM implied
+volatility given by the VIX. To estimate the ATM implied volatility in
+five days, we assume that the ATM implied volatility difference stays
+the same. Therefore, we use linear interpolation to project the implied
+volatility in five days.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the ATM implied volatility}
+\NormalTok{vix\_1y\_atm\_IV <{-}}\StringTok{ }\NormalTok{theta\_vol[}\DecValTok{1}\NormalTok{] }\OperatorTok{+}\StringTok{ }\NormalTok{theta\_vol[}\DecValTok{4}\NormalTok{]}
+\NormalTok{vix\_atm\_IV    <{-}}\StringTok{ }\KeywordTok{vol\_surface}\NormalTok{(S0, S0, M, theta\_vol[}\DecValTok{1}\NormalTok{], theta\_vol[}\DecValTok{2}\NormalTok{], theta\_vol[}\DecValTok{3}\NormalTok{], theta\_vol[}\DecValTok{4}\NormalTok{])}
+
+\CommentTok{\# Compute the ATM implied volatility difference}
+\NormalTok{vol\_shift     <{-}}\StringTok{ }\NormalTok{((vix\_1y\_atm\_IV }\OperatorTok{{-}}\StringTok{ }\NormalTok{vix\_atm\_IV) }\OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{t}
+
+\CommentTok{\# Set seed for generating pseudo{-}random numbers}
+\KeywordTok{seed}\NormalTok{(use\_set\_seed)}
+
+\CommentTok{\# Store in \textquotesingle{}sim\_ret\_4\textquotesingle{} normally distributed IID shocks }
+\NormalTok{sim\_ret\_}\DecValTok{4}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rnorm}\NormalTok{(t }\OperatorTok{*}\StringTok{ }\NormalTok{H, }\DataTypeTok{mean =} \KeywordTok{mean}\NormalTok{(log\_return), }\DataTypeTok{sd =} \KeywordTok{var}\NormalTok{(log\_return)}\OperatorTok{\^{}}\FloatTok{0.5}\NormalTok{), }\DataTypeTok{nrow =}\NormalTok{ H, }\DataTypeTok{ncol =}\NormalTok{ t)}
+
+\CommentTok{\# Compute the underlying asset price one week from now}
+\NormalTok{sim\_S\_}\DecValTok{4}\NormalTok{   <{-}}\StringTok{ }\NormalTok{S0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(sim\_ret\_}\DecValTok{4}\NormalTok{))}
+
+\CommentTok{\# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))}
+\NormalTok{sim\_price\_}\DecValTok{4}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ H, }\DataTypeTok{ncol =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Loop through H simulations and price each option}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H)\{}
+\NormalTok{  sim\_price\_}\DecValTok{4}\NormalTok{[i,] <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(price\_BS, sim\_S\_}\DecValTok{4}\NormalTok{[i], K, rf\_m\_t, Vol }\OperatorTok{+}\StringTok{ }\NormalTok{vol\_shift, M }\OperatorTok{{-}}\StringTok{ }\NormalTok{t }\OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{, Type)}
+\NormalTok{\}}
+
+\CommentTok{\# Compute the price of the portfolio for each replication and store it in \textquotesingle{}PF\_val\_4\textquotesingle{}}
+\NormalTok{PF\_val\_}\DecValTok{4}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(sim\_price\_}\DecValTok{4} \OperatorTok{*}\StringTok{ }\NormalTok{book[,}\DecValTok{1}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+We plot the P\&L distribution, as we did in previous parts.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the P\&L}
+\NormalTok{PL\_}\DecValTok{4}\NormalTok{ <{-}}\StringTok{ }\NormalTok{PF\_val\_}\DecValTok{4} \OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{{-}}\NormalTok{(t }\OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{rf\_t) }\OperatorTok{{-}}\StringTok{ }\NormalTok{PF\_val}
+
+\CommentTok{\# Compute the VaR and the ES of the P\&L distribution}
+\NormalTok{VaR\_}\DecValTok{4}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{4}\NormalTok{)[(}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H]}
+\NormalTok{ES\_}\DecValTok{4}\NormalTok{  <{-}}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{4}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\NormalTok{((}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H)])}
+
+\CommentTok{\# Plot an histogram}
+\KeywordTok{hist}\NormalTok{(PL\_}\DecValTok{4}\NormalTok{, }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(PL\_}\DecValTok{4}\NormalTok{))), }
+           \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\OperatorTok{{-}}\DecValTok{200}\NormalTok{,}\DecValTok{600}\NormalTok{),}
+           \DataTypeTok{main =} \StringTok{"Histogram of 10 000 simulated PL\_4"}\NormalTok{)}
+
+\CommentTok{\# Add a vertical line to show the VaR}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v   =} \KeywordTok{quantile}\NormalTok{(PL\_}\DecValTok{4}\NormalTok{, }\DataTypeTok{probs =}\NormalTok{ (}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha)),}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{,}
+       \DataTypeTok{lwd =} \FloatTok{2.5}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-28-1.pdf}
+
+\begin{verbatim}
+## The value at risk at alpha 0.95 is -122.51$.
+\end{verbatim}
+
+\begin{verbatim}
+## The expected shortfall at alpha 0.95 is -135.02$.
+\end{verbatim}
+
+Compared to previous risk models, Risk Model 4 exhibits similar results
+to the first risk model. This can be explained by the fact that by
+isolating the effect of the shift of the volatility surface on option
+prices, we did not take into account the negative correlation that
+exists between the underlying asset price and the volatility. In this
+case, we only generated stock returns and shifted the current implied
+volatility by the one-year ATM implied volatility difference. The shift
+reduced slightly the volatility of the options and therefore the VAR and
+ES of P\&L is a bit lower than Risk Model 1.
+
+\hypertarget{part-viii-risk-model-5-full-approach}{%
+\section{Part VIII: Risk Model 5: Full
+approach}\label{part-viii-risk-model-5-full-approach}}
+
+In this section, instead of using the time series of our market data, we
+use the residuals. We use a Garch(1,1) model for the log-returns of the
+underlying asset and an AR(1) model for the volatiliy. We assume that
+the residuals are normally distributed and use a gaussian copula to
+model the dependence structure.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#install.packages("rugarch")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"rugarch"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: parallel
+\end{verbatim}
+
+\begin{verbatim}
+## Registered S3 method overwritten by 'xts':
+##   method     from
+##   as.zoo.xts zoo
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'rugarch'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:stats':
+## 
+##     sigma
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Residuals of the log{-}returns of the underlying using a Garch(1,1) with Normal innovations}
+\NormalTok{spec   <{-}}\StringTok{ }\KeywordTok{ugarchspec}\NormalTok{(}\DataTypeTok{variance.model =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{model =} \StringTok{"sGARCH"}\NormalTok{, }\DataTypeTok{garchOrder =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{)),}
+                     \DataTypeTok{mean.model =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{armaOrder =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}
+                     \DataTypeTok{include.mean =} \OtherTok{FALSE}\NormalTok{),}
+                     \DataTypeTok{distribution.model =} \StringTok{"norm"}\NormalTok{)}
+
+\NormalTok{garch\_fit     <{-}}\StringTok{ }\KeywordTok{ugarchfit}\NormalTok{(}\DataTypeTok{spec =}\NormalTok{ spec, }\DataTypeTok{data =}\NormalTok{ log\_return)}
+\NormalTok{Resid\_returns <{-}}\StringTok{ }\NormalTok{garch\_fit}\OperatorTok{@}\NormalTok{fit}\OperatorTok{$}\NormalTok{residuals}
+
+\CommentTok{\# Residuals of the log{-}returns of the Vix using an AR(1) model }
+\NormalTok{ar1\_vix   <{-}}\StringTok{ }\KeywordTok{arima}\NormalTok{(vix\_return, }\DataTypeTok{order =} \KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{))}
+\NormalTok{Resid\_vix <{-}}\StringTok{ }\NormalTok{ar1\_vix}\OperatorTok{$}\NormalTok{residuals}
+
+\CommentTok{\# Fit normal marginals by MLE}
+\NormalTok{fit1   <{-}}\StringTok{ }\KeywordTok{suppressWarnings}\NormalTok{(}\KeywordTok{fitdistr}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Resid\_returns,}
+                         \DataTypeTok{densfun =}\NormalTok{ dnorm,}
+                         \DataTypeTok{start =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{mean =} \DecValTok{0}\NormalTok{, }\DataTypeTok{sd =} \DecValTok{1}\NormalTok{)))}
+\NormalTok{theta1 <{-}}\StringTok{ }\NormalTok{fit1}\OperatorTok{$}\NormalTok{estimate}
+
+\NormalTok{fit2   <{-}}\StringTok{ }\KeywordTok{suppressWarnings}\NormalTok{(}\KeywordTok{fitdistr}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Resid\_vix,}
+                         \DataTypeTok{densfun =}\NormalTok{ dnorm,}
+                         \DataTypeTok{start =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{mean =} \DecValTok{0}\NormalTok{, }\DataTypeTok{sd =} \DecValTok{1}\NormalTok{)))}
+
+\NormalTok{theta2 <{-}}\StringTok{ }\NormalTok{fit2}\OperatorTok{$}\NormalTok{estimate}
+
+\CommentTok{\# Set seed for generating pseudo{-}random numbers}
+\KeywordTok{seed}\NormalTok{(use\_set\_seed)}
+
+\CommentTok{\# Compute \textquotesingle{}U\_1\textquotesingle{} and \textquotesingle{}U\_2\textquotesingle{} and combine these two variables in \textquotesingle{}U\textquotesingle{}}
+\NormalTok{U1 <{-}}\StringTok{ }\KeywordTok{pnorm}\NormalTok{(Resid\_returns, }\DataTypeTok{mean =}\NormalTok{ theta1[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta1[}\DecValTok{2}\NormalTok{])}
+\NormalTok{U2 <{-}}\StringTok{ }\KeywordTok{pnorm}\NormalTok{(Resid\_vix, }\DataTypeTok{mean =}\NormalTok{ theta2[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta2[}\DecValTok{2}\NormalTok{])}
+\NormalTok{U  <{-}}\StringTok{ }\KeywordTok{cbind}\NormalTok{(U1, U2)}
+
+\CommentTok{\# U1 <{-} pnorm(log\_return, mean = mean(log\_return), sd = var(log\_return)\^{}0.5)}
+\CommentTok{\# U2 <{-} pnorm(vix\_return, mean = mean(vix\_return), sd = var(vix\_return)\^{}0.5)}
+\CommentTok{\# U  <{-} cbind(U1, U2)}
+
+\CommentTok{\# Calibrate a Gaussian copula}
+\NormalTok{C   <{-}}\StringTok{ }\KeywordTok{normalCopula}\NormalTok{(}\DataTypeTok{dim =} \DecValTok{2}\NormalTok{)}
+\NormalTok{fit <{-}}\StringTok{ }\KeywordTok{fitCopula}\NormalTok{(C, }\DataTypeTok{data =}\NormalTok{ U, }\DataTypeTok{method =} \StringTok{"ml"}\NormalTok{)}
+
+\NormalTok{sim\_U             <{-}}\StringTok{ }\KeywordTok{rCopula}\NormalTok{(H }\OperatorTok{*}\StringTok{ }\NormalTok{t, fit}\OperatorTok{@}\NormalTok{copula)}
+\NormalTok{sim\_Resid\_returns <{-}}\StringTok{ }\KeywordTok{qnorm}\NormalTok{(sim\_U[,}\DecValTok{1}\NormalTok{], }\DataTypeTok{mean =}\NormalTok{ theta1[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta1[}\DecValTok{2}\NormalTok{])}
+\NormalTok{sim\_Resid\_vix     <{-}}\StringTok{ }\KeywordTok{qnorm}\NormalTok{(sim\_U[,}\DecValTok{2}\NormalTok{], }\DataTypeTok{mean =}\NormalTok{ theta2[}\DecValTok{1}\NormalTok{], }\DataTypeTok{sd =}\NormalTok{ theta2[}\DecValTok{2}\NormalTok{])}
+
+\CommentTok{\# Initialize the array \textquotesingle{}sim\_ret\_5\textquotesingle{}}
+\NormalTok{sim\_ret\_}\DecValTok{5}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{array}\NormalTok{(}\DataTypeTok{data =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{dim =} \KeywordTok{c}\NormalTok{(H, }\DecValTok{2}\NormalTok{, t))}
+
+\CommentTok{\# Store in \textquotesingle{}sim\_ret\_5\textquotesingle{} daily residuals of log returns for the underlying asset and the VIX}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{t) \{}
+\NormalTok{  sim\_ret\_}\DecValTok{5}\NormalTok{[,,i] <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(sim\_Resid\_returns[(H }\OperatorTok{*}\StringTok{ }\NormalTok{(i }\OperatorTok{{-}}\StringTok{ }\DecValTok{1}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{(H }\OperatorTok{*}\StringTok{ }\NormalTok{i)], sim\_Resid\_vix[(H }\OperatorTok{*}\StringTok{ }\NormalTok{(i }\OperatorTok{{-}}\StringTok{ }\DecValTok{1}\NormalTok{) }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{(H }\OperatorTok{*}\StringTok{ }\NormalTok{i)])}
+\NormalTok{\}}
+
+\CommentTok{\# Initialize two vectors that contain the residuals of the underlying asset price and the VIX value one week from now}
+\NormalTok{sim\_S\_}\DecValTok{5}\NormalTok{   <{-}}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\OtherTok{NA}\NormalTok{, H)}
+\NormalTok{sim\_vol\_}\DecValTok{5}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\OtherTok{NA}\NormalTok{, H)}
+
+\CommentTok{\# Compute the underlying asset price and the VIX value one week from now}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H) \{}
+\NormalTok{  sim\_S\_}\DecValTok{5}\NormalTok{[i]   <{-}}\StringTok{ }\NormalTok{S0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{sum}\NormalTok{(sim\_ret\_}\DecValTok{5}\NormalTok{[i,}\DecValTok{1}\NormalTok{,]))}
+\NormalTok{  sim\_vol\_}\DecValTok{5}\NormalTok{[i] <{-}}\StringTok{ }\NormalTok{Vol0 }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\KeywordTok{sum}\NormalTok{(sim\_ret\_}\DecValTok{5}\NormalTok{[i,}\DecValTok{2}\NormalTok{,]))}
+\NormalTok{\}}
+
+\CommentTok{\# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))}
+\NormalTok{sim\_price\_}\DecValTok{5}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =}\NormalTok{ H, }\DataTypeTok{ncol =} \DecValTok{4}\NormalTok{)}
+
+\CommentTok{\# Loop through H simulations and price each option}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{H)\{}
+\NormalTok{  sim\_price\_}\DecValTok{5}\NormalTok{[i,] <{-}}\StringTok{ }\KeywordTok{mapply}\NormalTok{(price\_BS, sim\_S\_}\DecValTok{5}\NormalTok{[i], K, rf\_m\_t, sim\_vol\_}\DecValTok{5}\NormalTok{[i], M }\OperatorTok{{-}}\StringTok{ }\NormalTok{t }\OperatorTok{/}\StringTok{ }\DecValTok{250}\NormalTok{, Type)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+We plot the P\&L distribution, as we did in previous parts.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Compute the price of the portfolio for each replication and store it in \textquotesingle{}PF\_price\_5\textquotesingle{}}
+\NormalTok{PF\_val\_}\DecValTok{5}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(sim\_price\_}\DecValTok{5} \OperatorTok{*}\StringTok{ }\NormalTok{book[,}\DecValTok{1}\NormalTok{])}
+
+\CommentTok{\# Compute the P\&L}
+\NormalTok{PL\_}\DecValTok{5}\NormalTok{ <{-}}\StringTok{ }\NormalTok{PF\_val\_}\DecValTok{5} \OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(}\OperatorTok{{-}}\NormalTok{(t }\OperatorTok{/}\StringTok{ }\DecValTok{360}\NormalTok{) }\OperatorTok{*}\StringTok{ }\NormalTok{rf\_t) }\OperatorTok{{-}}\StringTok{ }\NormalTok{PF\_val}
+
+\CommentTok{\# Compute the VaR and the ES of the P\&L distribution}
+\NormalTok{VaR\_}\DecValTok{5}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{5}\NormalTok{)[(}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H]}
+\NormalTok{ES\_}\DecValTok{5}\NormalTok{  <{-}}\StringTok{ }\KeywordTok{mean}\NormalTok{(}\KeywordTok{sort}\NormalTok{(PL\_}\DecValTok{5}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\NormalTok{((}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha) }\OperatorTok{*}\StringTok{ }\NormalTok{H)])}
+
+\CommentTok{\# Plot an histogram}
+\KeywordTok{hist}\NormalTok{(PL\_}\DecValTok{5}\NormalTok{, }\DataTypeTok{nclass =} \KeywordTok{round}\NormalTok{(}\DecValTok{10} \OperatorTok{*}\StringTok{ }\KeywordTok{log}\NormalTok{(}\KeywordTok{length}\NormalTok{(PL\_}\DecValTok{5}\NormalTok{))), }
+           \DataTypeTok{probability =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\OperatorTok{{-}}\DecValTok{200}\NormalTok{,}\DecValTok{600}\NormalTok{),}
+           \DataTypeTok{main =} \StringTok{"Histogram of 10 000 simulated PL\_5"}\NormalTok{)}
+
+\CommentTok{\# Add a vertical line to show the VaR}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{v   =} \KeywordTok{quantile}\NormalTok{(PL\_}\DecValTok{5}\NormalTok{, }\DataTypeTok{probs =}\NormalTok{ (}\DecValTok{1} \OperatorTok{{-}}\StringTok{ }\NormalTok{alpha)),}
+       \DataTypeTok{lty =} \DecValTok{1}\NormalTok{,}
+       \DataTypeTok{lwd =} \FloatTok{2.5}\NormalTok{,}
+       \DataTypeTok{col =} \StringTok{"red"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Project_Main_Notebook_Final_files/figure-latex/unnamed-chunk-31-1.pdf}
+
+\begin{verbatim}
+## The value at risk at alpha 0.95 is -112.03$.
+\end{verbatim}
+
+\begin{verbatim}
+## The expected shortfall at alpha 0.95 is -123.96$.
+\end{verbatim}
+
+The VAR and ES are similar to the second model. We also tried this model
+versus using regular vix returns and underlying asset returns and end up
+with similar results. This means that the Garch(1,1) and AR(1) models
+doesn't really improve the results. Using the principle of Occam's
+razor, between two model giving similar results, using the simpler model
+is better.
+
+\hypertarget{part-ix-results-and-conclusion}{%
+\section{Part IX: Results and
+Conclusion}\label{part-ix-results-and-conclusion}}
+
+Here is a table summarizing the results of each model.
+
+\begin{verbatim}
+## Portfolio value 156.98$.
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Portfolio detail:
+\end{verbatim}
+
+\begin{verbatim}
+##      Quantity Option Type Strike Price Maturity Option price
+## [1,]    1.00     1.00     1600.00         0.08    87.57     
+## [2,]    1.00     1.00     1650.00         0.08    47.72     
+## [3,]    1.00     1.00     1750.00         0.16    15.30     
+## [4,]    1.00     1.00     1800.00         0.16     6.38     
+##      Position Value
+## [1,]   87.57       
+## [2,]   47.72       
+## [3,]   15.30       
+## [4,]    6.38
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Portfolio 5-days risk:
+\end{verbatim}
+
+\begin{verbatim}
+##                    M1: 1 risk/Gauss M2: 2 risks/Gauss M3: 2 risk/Copula
+## Value At Risk      -122.239         -111.686           -98.673         
+## Expected Shortfall -134.800         -124.359          -112.774         
+##                    M4: Vol Surface M5: Full Approach
+## Value At Risk      -122.515        -112.025         
+## Expected Shortfall -135.022        -123.956
+\end{verbatim}
+
+
+\end{document}
