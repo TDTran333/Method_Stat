@@ -23,5 +23,6 @@ lin_inter <- function(day) {
   r <- w_1 * rates[ub,2] + w_2 * rates[lb,2]
   
   # Output the interpolated risk-free rate
+  names(r) <- ("Interest Rate")
   return(r)
 }
