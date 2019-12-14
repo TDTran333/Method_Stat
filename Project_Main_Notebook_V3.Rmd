@@ -1,0 +1,812 @@
+---
+title: "Statistical Methods in Financial Engineering - Risk Management Project"
+author: "Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest, Thien Duy Tran"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+output:
+  html_notebook: default
+---
+
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 14px;
+  }
+td {  /* Table  */
+  font-size: 8px;
+}
+h1.title {
+  font-size: 38px;
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  font-size: 28px;
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    font-size: 22px;
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  font-size: 14px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkRed;
+}
+code.r{ /* Code block */
+    font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+    font-size: 12px;
+}
+</style>
+
+# Part I: Project Guidelines
+
+## Context
+You work as a quantitative analyst for a large investment bank. You and your team are responsible for
+challenging the models used by traders and risk managers. You work with R and love reproducible research.
+All your files are written in Rmarkdown or R notebook.
+
+You can watch the introductory video on Rmarkdown to help you build properly the R file.
+Moreover, you use GitHub with your team. You’ll build a dedicated project for the tasks below and use
+RStudio with GitHub extensively. You also use Loom to share your findings with other teams in the investment
+bank.
+
+## Learning Objectives
+1. Content (scientific rigor, concepts, creativity).\
+2. Choose the right tools.\
+3. Implement the steps correctly.\
+4. Come up with innovative solutions.\
+
+## Form: Coding, Collaboration and Presentation
+1. Build RStudio project with proper folder structure and Rmarkdown/nootebook file to reproduce your results.\
+2. Program with state-of-the-art coding standards.\
+3. Use GitHub repository for collaborative research.\
+4. Use Loom video for presenting your results.
+
+## Objective
+The objective of this project is to implement the risk management framework used for estimating the risk of a book of European call options by taking into account risk drivers such as the underlying asset and the implied volatility of the options.
+
+# Part II: Data
+
+## Loading the Data
+The first step is to load the database 'Market'. 'Market' is a list of 5 elements: S&P500 index prices, VIX values, the term structure of interest rates, and traded call and put options information. To make sure this code can run on any platform, we use the library 'here'. Also, we load 2 functions, the first one is use to price options using Black-Scholes and the second one is use to interpolate the term structure of interest. These functions will be detailled further in this script.
+
+
+```{r}
+# install.packages("here")
+library("here")
+
+# Load the data
+load(file = here("Data", "Market.rda"))
+
+# Load the functions
+source(file = here("Functions", "price_BS.r")) # Option prices using the Black-Scholes formula
+source(file = here("Functions", "lin_inter.r"))  # Linear interpolation of the interest rates
+
+# Assign data to different variables
+vix       <- as.vector(Market$vix)
+sp_500    <- as.vector(Market$sp500)
+calls     <- as.vector(Market$calls)
+puts      <- as.vector(Market$puts)
+
+# Create a matrix 'rates' with two columns: maturities and risk-free rates
+rates     <- matrix(data = NA, nrow = length(Market$rf), ncol = 2)
+rates[,1] <- as.numeric((attributes(Market$rf))[[2]])
+rates[,2] <- Market$rf
+
+# Assign column names to 'rates'
+colnames(rates) <- c("Maturities", "Risk-free Rates")
+```
+
+# Part III: Pricing a Portfolio of Options
+
+The portfolio under consideration contains four options: K = 1600 and T-t = 20 days, K = 1650 and T-t = 20 days, K = 1750 and T-t = 40 days, and K = 1800 and T-t = 40 days. K is the strike price and T-t is days before maturity. We assume that there is 250 days in a year and thus convert times to expiry in years by dividing by 250. We first create a matrix 'book' that contains information regarding the options in the portfolio.
+
+```{r}
+# Create matrix
+book <- matrix(data = NA, nrow = 4, ncol = 6)
+
+# Assign names to columns
+# Option Type: Call = 1, Put = 0
+colnames(book) <- c("Quantity", "Option Type", "Strike Price", "Maturity", "Option price", "Position Value")
+
+# Store initial values
+book[1,1:4] <- c(1, 1, 1600, 20 / 250)
+book[2,1:4] <- c(1, 1, 1650, 20 / 250)
+book[3,1:4] <- c(1, 1, 1750, 40 / 250)
+book[4,1:4] <- c(1, 1, 1800, 40 / 250)
+```
+
+The next step is to use the most recent underlying asset price and VIX value as well as the interpolated risk-free rates to compute the value of each option in the portfolio that we store in the variable 'call_price'. The value of the portfolio of options is simply the sum of each option's value. To do this, we use two functions described below.
+
+1. 'lin_inter': Takes as input a maturity in years (360-day basis) and outputs the associated rate. Uses linear interpolation with the given term structure.
+2. 'price_BS': Takes as inputs the underlying asset price, the option strike price, the risk-free rate, the volatility, the maturity and the option type. Uses Black-Scholes model to price options.
+
+```{r}
+# Number of observations
+n_obs <- length(sp_500)
+
+# Convert 250-day basis year in 360-day basis year
+m <- book[,4]*(250 / 360)
+
+# Interpolated interest rates
+rf <- mapply(lin_inter, m)
+
+# Latest underlying asset price (spot price)
+S0 <- sp_500[n_obs]
+S <- matrix(data = S0, nrow = 4)
+
+# Latest VIX value
+Vol0 <- vix[n_obs]
+Vol <- matrix(data = Vol0, nrow = 4)
+
+# Strike prices
+K <- book[,3]
+
+# Maturities
+M <- book[,4]
+
+# Option type
+Type <- book[,2]
+
+# Compute the options values
+book[,5] <- mapply(price_BS, S, K, rf, Vol, M, Type)
+
+# Compute the value of the portfolio
+book[,6] <- book[,1]*book[,5]
+PF_val   <- sum(book[,6])
+```
+
+```{r echo=FALSE}
+# Output the results
+cat(sprintf("The total value of the Options Portfolio is %.2f$.\n", PF_val))
+cat(sprintf("\nPortfolio detail:\n\n"))
+print(format(book, digits=2), quote = F)
+```
+
+It is not surprising to see that the value of the first option is higher than the value of the second option. Indeed, since the strike price is lower for the first option, the first option is deeper ITM than the second option and it should therefore have a higher price. The same reasoning applies to the third and fourth options.
+
+# Part IV: Risk Model 1: One Risk Driver and Gaussian Distribution
+
+We now want to estimate the value-at-risk (VaR) and the expected shortfall (ES) of this portfolio of options over the course of the following week. To do so, we must first compute the underlying asset log returns.
+
+```{r}
+# Daily underlying asset log returns
+log_return <- diff(log(sp_500))
+```
+
+Next, we assume that the underlying asset log returns follow a normal distribution. The normal distribution parameters can be found by computing the empirical mean and standard deviation of the underlying asset daily log returns.
+
+```{r}
+# Number of log returns
+n_ret <- length(log_return)
+
+# Calibration
+mu_hat_1 <- mean(log_return)
+s2_hat_1 <- var(log_return)
+sd_hat_1  <- s2_hat_1^0.5
+
+# Store parameters in 'theta_1'
+theta_1 <- c(mu_hat_1, sd_hat_1)
+```
+
+Now that we have estimated the parameters of the underlying asset return log returns, we can run a simulation of the underlying asset price one week ahead by generating normally distributed IID shocks with mean 'mu_hat' and standard deviation 'sd_hat'. Since we found the distribution parameters using daily log returns, we generate five shocks per simulation and sum these shocks to obtain the overall shock over one week. We fix the size of the simulation to 10 000.
+
+```{r}
+# Number of simulation
+H <- 10000
+
+# Number of days between now and the forecast horizon
+t <- 5
+
+# Use set seed for testing purpose? Yes (1), No (0).
+source(file = here("Functions", "seed.r"))
+use_set_seed <- 1
+seed(use_set_seed)
+
+# Store in 'sim_ret_1' normally distributed IID shocks with mean 'mu_hat' and standard deviation 'sd_hat'
+sim_ret_1 <- matrix(rnorm(t * H, mean = theta_1[1], sd = theta_1[2]), nrow = H, ncol = t)
+
+# Histogram of the simulated returns
+hist(sim_ret_1, nclass = round(10 * log(length(sim_ret_1))),
+                probability = TRUE,
+                main = "Histogram of 10 000 Simulated Returns",
+                xlab = "Simulated Returns")
+```
+
+In order to obtain the underlying asset price one week from now, we simply have to compute the exponential sum of the five daily normally distributed IID shocks per trajectory and multiply by the latest underlying asset price. The last things we need to modify are the risk-free rate for the remaining life of the option and the remaining days of the option. The strike price does not change over the option life and the volatility is assumed to be constant.
+
+```{r}
+# Compute the price of the underlying asset one week from now
+sim_S_1 <- S0 * exp(rowSums(sim_ret_1))
+
+# Histogram of the simulated prices
+hist(sim_S_1, nclass = round(10 * log(length(sim_S_1))),
+              probability = TRUE,
+              main = "Histogram of 10 000 Simulated Prices",
+              xlab = "Simulated Prices")
+
+# Add a verticale line that represents the spot price
+abline(v   = S0,
+       lty = 1,
+       lwd = 2.5,
+       col = "blue")
+
+# Update the risk-free rate (360-day basis year)
+rf_m_t <- mapply(lin_inter, (m - t / 360))
+
+# Initialize a matrix to store call prices (10 000 rows (1 per simulation), 4 columns (1 per option))
+sim_price_1 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through H simulations and price the options
+for (i in 1:H){
+  sim_price_1[i,] <- mapply(price_BS, sim_S_1[i], K, rf_m_t, Vol, M - t / 250, Type)
+}
+```
+
+For each replication, we can compute the value of the portfolio of options by summing the value of the four call options. Recall that we want to estimate the VaR and the ES of this portfolio of options over the course of the following week. Therefore, for each replication, we must compute a P&L by discounting at the risk-free rate the value of the portfolio of options one week from now and subtracting the value of the portfolio observed today.
+
+```{r}
+# Compute the price of the portfolio for each replication and store it in 'PF_val_1'
+PF_val_1 <- rowSums(sim_price_1 * book[,1])
+
+# Histogram of portfolio's value
+hist(PF_val_1, nclass = round(10 * log(length(PF_val_1))),
+               probability = TRUE, 
+               main = "Histogram of 10 000 simulated portfolios value",
+               xlab = "simulated portfolios values")
+
+# Add a vertical that represent last portfolio's value
+abline(v   = PF_val,
+       lty = 1,
+       lwd = 2.5,
+       col = "blue")
+```
+
+Based on the histogram of the simulated portfolio values, we notice that the porfolio of call options as a function of underlying asset price at t = 0 is right skewed. Call option prices are therefore more sensible to a rise in the price of the underlying asset rather than a decline.
+
+```{r}
+# Compute the risk-free rate for a period of 5 days (360-day basis year)
+rf_t <- lin_inter(t / 360)
+
+# Compute the P&L
+PL_1 <- PF_val_1 * exp(-(t / 360) * rf_t) - PF_val
+```
+
+The last step is to compute the VaR and the ES of the portfolio of options P&L distribution. In order to do so, we sort the P&L values in ascending order and identify the (1-alpha)-quartile of the empirical distribution for the VaR, where alpha is the risk level (in our case, 0.95). The ES is simply the mean of the P&L values smaller than the VaR.
+
+
+```{r}
+# Set alpha to a desired significance level
+alpha <- 0.95
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_1 <- sort(PL_1)[(1 - alpha) * H]
+ES_1  <- mean(sort(PL_1)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_1, nclass = round(10 * log(length(PL_1))), 
+           probability = TRUE,
+           main = "Histogram of 10 000 simulated PL_1")
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_1, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
+
+```{r echo=FALSE}
+# Output the results
+cat(sprintf("The value at risk at alpha %.2f is %.2f$. \n", alpha, VaR_1))
+cat(sprintf("The expected shortfall at alpha %.2f is %.2f$.", alpha, ES_1))
+```
+
+
+## Analysis portfolio drivers
+
+This section explain what drive the portfolio price:
+What drive portfolio value is the inputs of our models (BlackShcole formula). Strike price and volatility are constants, risk-free rate is stable. So distribution of the portfolio value can be explained by price of underlying asset and days remaining until maturity.
+
+Porfolio value is right skewed due to the relationship between calls value and underlying price at t = 0.
+
+Here we observe the value of the calls and the portfolio of the calls 5 days later. We isolated the change in portfolio value due to days until maturity change only i.e. without change in the underlying asset price, volatility and risk-free rate.
+
+```{r}
+
+day_s = 5/250
+book_5day_later      <- book[,1:6]
+book_5day_later[,4]  <- book[,4] - day_s
+
+book_5day_later[,5] <- mapply(price_BS, S, K, rf, Vol, M - day_s, Type)
+book_5day_later[,6] <- book_5day_later[,1]*book_5day_later[,5]
+
+PF_val_M_choc <- sum(book_5day_later[,6])
+
+M_choc <- PF_val_M_choc - PF_val
+```
+
+```{r echo=FALSE}
+# Output the results
+cat(sprintf("Calls value and maturity usually have positive relationship, and we can observe that 5 days in less until maturity lower portfolio value by  %.2f$.\n", abs(M_choc)))
+```
+
+Summarization of P&N distribution and it's drivers
+
+1. Portfolio price and underlying price have positive relationship
+2. P&N is right skewed because of the relationship between Calls value and underlying asset price at t = 0
+3. Portfolio value is more sensible to a positive change in uderlying asset price than a negative one
+4. 5 days in less until maturity make the portolio loose 8.06$ in value (for a same underlying asset price)
+
+
+# Part V: Risk Model 2: Two Risk Drivers and Gaussian Distribution
+
+The biggest assumption of the Risk Model 1 is that the volatility is assumed constant between now and the following week. In practice, volatility is not constant as evidenced by a time series of the VIX index as a function of time. To account for this, we allow volatility to vary in Risk Model 2. More specifically, we model the dynamics of the underlying asset price and volatility with a multivariate normal distribution that we calibrate using the S&P500 and VIX log returns.
+
+```{r}
+# install.packages("MASS")
+library("MASS")
+
+# Daily VIX log returns
+vix_return <- diff(log(vix))
+
+# Store underlying asset log returns and VIX log returns in 'rets'
+rets_2     <- matrix(NA, nrow = n_ret, ncol = 2)
+rets_2[,1] <- log_return
+rets_2[,2] <- vix_return
+
+# Calibration
+mu_hat_2 <- colMeans(rets_2)
+sg_hat_2 <- ((n_ret - 1) / n_ret) * cov(rets_2)
+
+# Store parameters in 'theta_2'
+theta_2 <- list(mu = mu_hat_2, sigma = sg_hat_2)
+```
+
+Now that we have calibrate a multivariate normal distribution on our data, we can run a simulation of the underlying asset price and volatility index value one week from now, re-price our portfolio of call options in each scenario, and plot the P&L distribution.
+
+```{r}
+# Initialize the array 'sim_ret_2'
+sim_ret_2 <- array(data = NA, dim = c(H, 2, t))
+
+# Set seed for generating pseudo-random numbers
+seed(use_set_seed)
+
+# Store in 'sim_ret_2' daily shocks from a multivariate normal distribution with parameters 'theta_2'
+for (i in 1:t) {
+  sim_ret_2[,,i] <- mvrnorm(n = H, mu = theta_2$mu, Sigma = theta_2$sigma)
+}
+
+# Initialize two vectors that contain the underlying asset price and the VIX value one week from now
+sim_S_2 <- rep(NA, H)
+sim_vol_2 <- rep(NA, H)
+
+# Compute the underlying asset price and the VIX value one week from now
+for (i in 1:H) {
+  sim_S_2[i] <- S0 * exp(sum(sim_ret_2[i,1,]))
+  sim_vol_2[i] <- Vol0 * exp(sum(sim_ret_2[i,2,]))
+}
+
+# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))
+sim_price_2 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through H simulations and price each option
+for (i in 1:H){
+  sim_price_2[i,] <- mapply(price_BS, sim_S_2[i], K, rf_m_t, sim_vol_2[i], M - t / 250, Type)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_val_2'
+PF_val_2 <- rowSums(sim_price_2 * book[,1])
+
+# Compute the P&L
+PL_2 <- PF_val_2 * exp(-(t / 360) * rf_t) - PF_val
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_2 <- sort(PL_2)[(1 - alpha) * H]
+ES_2  <- mean(sort(PL_2)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_2, nclass = round(10 * log(length(PL_2))), 
+           probability = TRUE,
+           main = "Histogram of 10 000 simulated PL_2")
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_2, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
+
+```{r echo=FALSE}
+# Output the results
+cat(sprintf("The value at risk at alpha %.2f is %.2f$. \n", alpha, VaR_2))
+cat(sprintf("The expected shortfall at alpha %.2f is %.2f$.", alpha, ES_2))
+```
+
+Compared to Risk Model 1, Risk Model 2 has a higher (better) VaR and a higher (better) ES for alpha = 0.95. This is not surprising knowing that the correlation between the underlying asset log returns and the VIX log returns is negative:
+
+```{r echo=FALSE}
+# Output the correlation
+cat(sprintf("The correlation between S&P 500 and the VIX is %.4f", cor(log_return, vix_return)))
+```
+
+Since the value of a call option increases as the underlying asset and volatility rise, and because these two variables are negatively correlated, they have an offsetting effect on the value of a call option. As a result, our portfolio of call options is less risky and has a higher VaR.
+
+# Part VI: Risk Model 3: Two Risk Drivers and Copula-Marginal Model (Student-t and Gaussian Copula)
+
+We add another layer on top of what we built up to now by introducing a Gaussian copula in the mix. The copula models the dependence structure of the two marginal distributions. In this case, we assume that the marginals are student-t distributions with 10 degrees of freedom for the underlying asset price and 5 degrees of freedom for the volatility.
+
+The first step in implementing Risk Model 3 is to calibrate the two marginal distributions using a similar methodology than previously discussed.
+
+```{r}
+# install.packages("copula")
+library("copula")
+
+# install.packages("fGarch")
+library("fGarch")
+
+# Load the function
+source(file = here("Functions", "nll_student.r")) # Computes the negative log-likelihood function
+
+# Define an initial vector of parameters for the underlying asset log returns
+theta_0 <- c(mean(log_return), sd(log_return), 10)
+
+# Calibrate the student-t distribution on the underlying asset log returns
+tmp <- optim(par = theta_0,
+             fn = nll_student,
+             method = "L-BFGS-B",
+             lower = c(-Inf, 1e-5, 10),
+             x = log_return)
+
+# Store parameters in 'theta_S_3'
+theta_S_3 <- tmp$par
+
+# Define an initial vector of parameters for the VIX log returns
+theta_0 <- c(mean(vix_return), sd(vix_return), 5)
+
+# Calibrate the student-t distribution on the VIX log returns
+tmp <- optim(par = theta_0,
+             fn = nll_student,
+             method = "L-BFGS-B",
+             lower = c(-Inf, 1e-5, 5),
+             x = vix_return)
+
+# Store parameters in 'theta_vol_3'
+theta_vol_3 <- tmp$par
+```
+
+The second step in implementing Risk Model 3 is to use the probability integral transformation theorem to obtain random variables that follow a uniform distribution for both the underlying asset and the volatility from their respective cumulative distribution function. We call these variables 'U_1' and 'U_2' and use them to calibrate the Gaussian copula.
+
+```{r}
+# Compute 'U_1' and 'U_2' and combine these two variables in 'U'
+U_1 <- pstd(log_return, mean = theta_S_3[1], sd = theta_S_3[2], nu = theta_S_3[3])
+U_2 <- pstd(vix_return, mean = theta_vol_3[1], sd = theta_vol_3[2], nu = theta_vol_3[3])
+U   <- cbind(U_1, U_2)
+
+# Calibrate a Gaussian copula
+C   <- normalCopula(dim = 2)
+fit <- fitCopula(C, data = U, method = "ml")
+
+# Set seed for generating pseudo-random numbers
+seed(use_set_seed)
+
+sim_U       <- rCopula(H * t, fit@copula)
+sim_log_ret <- qstd(sim_U[,1], mean = theta_S_3[1], sd = theta_S_3[2], nu = theta_S_3[3])
+sim_vix_ret <- qstd(sim_U[,2], mean = theta_vol_3[1], sd = theta_vol_3[2], nu = theta_vol_3[3])
+```
+
+Now that we have calibrate the two marginal distributions and the Gaussian copula on our data, we can run a simulation of the underlying asset price and volatility index value one week from now, re-price our portfolio of call options in each scenario, and plot the P&L distribution, as we did in previous parts.
+
+```{r}
+# Initialize the array 'sim_ret_3'
+sim_ret_3 <- array(data = NA, dim = c(H, 2, t))
+
+# Store in 'sim_ret_3' daily log returns for the underlying asset and the VIX
+for (i in 1:t) {
+  sim_ret_3[,,i] <- c(sim_log_ret[(H * (i - 1) + 1):(H * i)], sim_vix_ret[(H * (i - 1) + 1):(H * i)])
+}
+
+# Initialize two vectors that contain the underlying asset price and the VIX value one week from now
+sim_S_3 <- rep(NA, H)
+sim_vol_3 <- rep(NA, H)
+
+# Compute the underlying asset price and the VIX value one week from now
+for (i in 1:H) {
+  sim_S_3[i]   <- S0 * exp(sum(sim_ret_3[i,1,]))
+  sim_vol_3[i] <- Vol0 * exp(sum(sim_ret_3[i,2,]))
+}
+
+# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))
+sim_price_3 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through H simulations and price each option
+for (i in 1:H){
+  sim_price_3[i,] <- mapply(price_BS, sim_S_3[i], K, rf_m_t, sim_vol_3[i], M - t / 250, Type)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_val_3'
+PF_val_3 <- rowSums(sim_price_3 * book[,1])
+
+# Compute the P&L
+PL_3 <- PF_val_3 * exp(-(t / 360) * rf_t) - PF_val
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_3 <- sort(PL_3)[(1 - alpha) * H]
+ES_3  <- mean(sort(PL_3)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_3, nclass = round(10 * log(length(PL_3))), 
+           probability = TRUE,
+           main = "Histogram of 10 000 simulated PL_3")
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_3, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
+
+```{r echo=FALSE}
+# Output the results
+cat(sprintf("The value at risk at alpha %.2f is %.2f$. \n", alpha, VaR_3))
+cat(sprintf("The expected shortfall at alpha %.2f is %.2f$.", alpha, ES_3))
+```
+
+Compared to Risk Model 1 and Risk Model 2, Risk Model 3 has the smallest VaR and the smallest ES for alpha = 0.95. As it was the case with Risk Model 2, we account for the fact that the underlying asset price and the volatility are negatively correlated. On top of that, we use the Gaussian copula to model the dependence structure of the two marginal distributions. The Gaussian copula underestimates the likelihood of extreme negative events in the tail of the distributions.
+
+# Part VII: Risk Model 4: Volatility Surface
+
+In this section, we take a slightly different approach than with previous risk models. Indeed, we fit a volatility surface on implied volatilities of traded call and put options using the parametric model described in the assignment.
+
+```{r}
+#install.packages("rgl")
+library("rgl")
+
+# Load the functions
+source(file = here("Functions", "vol_surface.R"))   # Implied volatility of an option
+source(file = here("Functions", "vol_calibrate.r")) # Sum of absolute deviations of implied volalities
+
+calls <- as.matrix(Market$calls)
+puts <- as.matrix(Market$puts)
+                   
+# Count the number of traded options
+nb_opts <- nrow(calls) + nrow(puts)
+
+# Build a matrix that contains the information relevant to traded call and put options
+mkt_vol <- matrix(NA, nrow = nb_opts, ncol = 4)
+
+# Assign names to columns
+colnames(mkt_vol) <- c("S", "K", "tau", "IV")
+
+# Latest underlying asset price (spot price)
+mkt_vol[,1] <- matrix(data = S0, nb_opts)
+
+# Strike price of options
+mkt_vol[,2] <- c(calls[,1], puts[,1])
+
+# Time to expiry of options
+mkt_vol[,3] <- c(calls[,2], puts[,2])
+
+# Implied volatility of options
+mkt_vol[,4] <- c(calls[,3], puts[,3])
+
+# Set a vector of initial values of a1, a2, a3, and a4
+x0 <- c(0.2, 1, 1, 0.1)
+
+# Calibrate the volatility surface on traded options
+tmp <- optim(par = x0, fn = vol_calibrate)
+
+# Store parameters in 'theta_vol'
+theta_vol <- tmp$par
+
+# Generate a sequence of strike price and time to expiry
+x1 <- S0 * seq(0.5, 1.5, (1.5 - 0.5) / 1000)
+x2 <- seq(0.01, 2, (2 - 0.01) / 1000)
+
+# Generate al possible combinations of 'x1' and 'x2'
+x3 <- expand.grid(x1,x2)
+
+# Compute the implied volatility for each combination
+y  <- vol_surface(S0, x3[,1], x3[,2], theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
+
+# Create a 3D-plot of the fitted volatility surface
+# plot3d(x3[,1], x3[,2], y)
+```
+
+Now that we have estimated the parameters that describe the shape of the volatility surface observed at t = 0, we can compute the ATM implied volatility given by the VIX. To estimate the ATM implied volatility in five days, we assume that the ATM implied volatility difference stays the same. Therefore, we use linear interpolation to project the implied volatility in five days.
+
+```{r}
+# Compute the ATM implied volatility
+vix_1y_atm_IV <- theta_vol[1] + theta_vol[4]
+vix_atm_IV    <- vol_surface(S0, S0, M, theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
+
+# Compute the ATM implied volatility difference
+vol_shift     <- ((vix_1y_atm_IV - vix_atm_IV) / 250) * t
+
+# Set seed for generating pseudo-random numbers
+seed(use_set_seed)
+
+# Store in 'sim_ret_4' normally distributed IID shocks 
+sim_ret_4 <- matrix(rnorm(t * H, mean = mean(log_return), sd = var(log_return)^0.5), nrow = H, ncol = t)
+
+# Compute the underlying asset price one week from now
+sim_S_4   <- S0 * exp(rowSums(sim_ret_4))
+
+# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))
+sim_price_4 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through H simulations and price each option
+for (i in 1:H){
+  sim_price_4[i,] <- mapply(price_BS, sim_S_4[i], K, rf_m_t, Vol + vol_shift, M - t / 250, Type)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_val_4'
+PF_val_4 <- rowSums(sim_price_4 * book[,1])
+
+# Compute the P&L
+PL_4 <- PF_val_4 * exp(-(t / 360) * rf_t) - PF_val
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_4 <- sort(PL_4)[(1 - alpha) * H]
+ES_4  <- mean(sort(PL_4)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_4, nclass = round(10 * log(length(PL_4))), probability = TRUE)
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_4, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
+
+```{r echo=FALSE}
+# Output the results
+cat(sprintf("The value at risk at alpha %.2f is %.2f$. \n", alpha, VaR_4))
+cat(sprintf("The expected shortfall at alpha %.2f is %.2f$.", alpha, ES_4))
+```
+
+Compared to previous risk models, Risk Model 4 exhibits similar results to the first risk model. This can be explained by the fact that by isolating the effect of the shift of the volatility surface on option prices, we did not take into account the negative correlation that exists between the underlying asset price and the volatility. In this case, we only generated stock returns and shifted the current implied volatility by the one-year ATM implied volatility difference.
+
+# Part VIII: Risk Model 5: Full approach
+
+```{r}
+#install.packages("rugarch")
+library("rugarch")
+
+# Residuals of the log-returns of the underlying using a Garch(1,1) with Normal innovations
+spec   <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+                     mean.model = list(armaOrder = c(0,0),
+                     include.mean = FALSE),
+                     distribution.model = "norm")
+
+garch_fit     <- ugarchfit(spec = spec, data = log_return)
+Resid_returns <- garch_fit@fit$residuals
+
+# Residuals of the log-returns of the Vix using an AR(1) model 
+ar1_vix   <- arima(vix_return, order = c(1,0,0))
+Resid_vix <- ar1_vix$residuals
+
+# Fit normal marginals by MLE
+fit1   <- suppressWarnings(fitdistr(x = Resid_returns,
+                         densfun = dnorm,
+                         start = list(mean = 0, sd = 1)))
+theta1 <- fit1$estimate
+
+fit2   <- suppressWarnings(fitdistr(x = Resid_vix,
+                         densfun = dnorm,
+                         start = list(mean = 0, sd = 1)))
+
+theta2 <- fit2$estimate
+
+# Set seed for generating pseudo-random numbers
+seed(use_set_seed)
+
+# Compute 'U_1' and 'U_2' and combine these two variables in 'U'
+U1 <- pnorm(Resid_returns, mean = theta1[1], sd = theta1[2])
+U2 <- pnorm(Resid_vix, mean = theta2[1], sd = theta2[2])
+U  <- cbind(U1, U2)
+
+# Calibrate a Gaussian copula
+C   <- normalCopula(dim = 2)
+fit <- fitCopula(C, data = U, method = "ml")
+
+sim_U             <- rCopula(H * t, fit@copula)
+sim_Resid_returns <- qnorm(sim_U[,1], mean = theta1[1], sd = theta1[2])
+sim_Resid_vix     <- qnorm(sim_U[,2], mean = theta2[1], sd = theta2[2])
+
+# Initialize the array 'sim_ret_5'
+sim_ret_5 <- array(data = NA, dim = c(H, 2, t))
+
+# Store in 'sim_ret_5' daily residuals of log returns for the underlying asset and the VIX
+for (i in 1:t) {
+  sim_ret_5[,,i] <- c(sim_Resid_returns[(H * (i - 1) + 1):(H * i)], sim_Resid_vix[(H * (i - 1) + 1):(H * i)])
+}
+
+# Initialize two vectors that contain the residuals of the underlying asset price and the VIX value one week from now
+sim_S_5   <- rep(NA, H)
+sim_vol_5 <- rep(NA, H)
+
+# Compute the underlying asset price and the VIX value one week from now
+for (i in 1:H) {
+  sim_S_5[i]   <- S0 * exp(sum(sim_ret_5[i,1,]))
+  sim_vol_5[i] <- Vol0 * exp(sum(sim_ret_5[i,2,]))
+}
+
+# Initialize a matrix to store call prices (H rows (1 per simulation), 4 columns (1 per option))
+sim_price_5 <- matrix(NA, nrow = H, ncol = 4)
+
+# Loop through H simulations and price each option
+for (i in 1:H){
+  sim_price_5[i,] <- mapply(price_BS, sim_S_5[i], K, rf_m_t, sim_vol_5[i], M - t / 250, Type)
+}
+
+# Compute the price of the portfolio for each replication and store it in 'PF_price_5'
+PF_val_5 <- rowSums(sim_price_5 * book[,1])
+
+# Compute the P&L
+PL_5 <- PF_val_5 * exp(-(t / 360) * rf_t) - PF_val
+
+# Compute the VaR and the ES of the P&L distribution
+VaR_5 <- sort(PL_5)[(1 - alpha) * H]
+ES_5  <- mean(sort(PL_5)[1:((1 - alpha) * H)])
+
+# Plot an histogram
+hist(PL_5, nclass = round(10 * log(length(PL_5))), probability = TRUE)
+
+# Add a vertical line to show the VaR
+abline(v   = quantile(PL_5, probs = (1 - alpha)),
+       lty = 1,
+       lwd = 2.5,
+       col = "red")
+```
+
+```{r echo=FALSE}
+# Output the results
+cat(sprintf("The value at risk at alpha %.2f is %.2f$. \n", alpha, VaR_5))
+cat(sprintf("The expected shortfall at alpha %.2f is %.2f$.", alpha, ES_5))
+```
+
+[COMMENTER LES RÉSULTATS ICI]
+Compared once again to the previous models, the VAR and ES are similar to the second model. Which is a bit surprising because model 2 doesn't take in account the dependance between the two sources of risks while model 5 does; the asset value depend in a way on the conditionel variance. 
+
+
+# Part IX: Results and Conclusion
+
+```{r echo=FALSE}
+# Output the results
+Results     <- matrix(NA, nrow=2, ncol=5)
+Results[1,] <- c(VaR_1, VaR_2, VaR_3, VaR_4, VaR_5)
+Results[2,] <- c(ES_1, ES_2, ES_3, ES_4, ES_5)
+
+# Assign names to columns
+colnames(Results) <- c("M1: 1 risk/Gauss",
+                       "M2: 2 risks/Gauss",
+                       "M3: 2 risk/Copula",
+                       "M4: Vol Surface",
+                       "M5: Full Approach")
+
+# Assign names to rows
+rownames(Results) <- c("Value At Risk",
+                       "Expected Shortfall")
+
+# Print ouput
+cat(sprintf("Portfolio value %.2f$.\n", PF_val))
+cat(sprintf("\nPortfolio detail:\n\n"))
+print(format(book, digits=2), quote = F)
+
+# Print ouput
+cat(sprintf("\nPortfolio 5-days risk:\n\n"))
+print(format(Results, digits=5,  justify = "centre"), quote = F)
+```
+
+Here is a table summarizing results of each models. Let compare the models:
+
+Models 1 and 4 is the most conservative
+Models 2 and 5 are somewhat less conservative than models 1 and 4
+Model 3 is the most agressive of the 5 models invastigated
+
+Model 1 and 4 are those who doesn't take in account a negative dependance and therefore they are most conservators
+While model 3 take in account a negative dependance, and produce a more aggresive model
+Model 2 and 5 are in between
+
