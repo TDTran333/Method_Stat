@@ -400,8 +400,7 @@ theta_vol_3 <- tmp$par
 
 # Compute 'U_1' and 'U_2' and combine these two variables in 'U'
 U_1 <- pstd(log_return, mean = theta_S_3[1], sd = theta_S_3[2], nu = theta_S_3[3])
-U_2 <- pstd(log_return, mean = theta_vol_3[1], sd = theta_vol_3[2], nu = theta_vol_3[3])
-#U_2 <- pstd(vix_return, mean = theta_vol_3[1], sd = theta_vol_3[2], nu = theta_vol_3[3])
+U_2 <- pstd(vix_return, mean = theta_vol_3[1], sd = theta_vol_3[2], nu = theta_vol_3[3])
 U   <- cbind(U_1, U_2)
 
 # Calibrate a Gaussian copula
@@ -521,7 +520,8 @@ x3 <- expand.grid(x1,x2)
 y  <- vol_surface(S0, x3[,1], x3[,2], theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
 
 # Create a 3D-plot of the fitted volatility surface
-plot3d(x3[,1], x3[,2], y)
+#plot3d(x3[,1], x3[,2], y)
+
 ```
 
 Re-price the portfolio in one week assuming the same parametric model but shifted by the one-year
@@ -531,9 +531,9 @@ given by the VIX is (a1 + a4).
 ```{r}
 
 vix_1y_atm_IV <- theta_vol[1] + theta_vol[4]
-vix_atm_IV <- vol_surface(S0, S0, M - t/250, theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
+vix_atm_IV <- vol_surface(S0, S0, M, theta_vol[1], theta_vol[2], theta_vol[3], theta_vol[4])
 
-vol_shift <- vix_1y_atm_IV - vix_atm_IV 
+vol_shift <- ((vix_1y_atm_IV - vix_atm_IV)/250) * t 
 
 # Set seed for generating pseudo-random numbers
 seed(use_set_seed)
@@ -678,7 +678,7 @@ cat(sprintf("The expected shortfall at alpha %.2f is %.2f$.", alpha, ES_5))
 
 # Part IX: Results and Conclusion
 
-```{r}
+```{r echo=FALSE}
 # Output the results
 Results     <- matrix(NA, nrow=2, ncol=5)
 Results[1,] <- c(VaR_1, VaR_2, VaR_3, VaR_4, VaR_5)
