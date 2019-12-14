@@ -3,9 +3,11 @@ title: "Statistical Methods in Financial Engineering - Risk Management Project"
 author: "Chloe Morin-Leclerc, Felix-Antoine Groulx, Denis Genest, Thien Duy Tran"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 output:
-  word_document: default
-  pdf_document: default
+  html_document:
+    df_print: paged
   html_notebook: default
+  pdf_document: default
+  word_document: default
 ---
 
 <style type="text/css">
@@ -40,7 +42,7 @@ pre { /* Code block - determines code spacing between lines */
     font-size: 12px;
 }
 </style>
-# LOOM video link: 
+# LOOM video link: https://www.loom.com/share/64a6aa9e2f914be494eeae7106631811
 
 # Part I: Project Guidelines
 
@@ -776,7 +778,7 @@ We plot the P&L distribution, as we did in previous parts.
 
 ```{r}
 
-# Compute the price of the portfolio for each replication and store it in 'PF_price_5'
+# Compute the price of the portfolio for each replication and store it in 'PF_val_5'
 PF_val_5 <- rowSums(sim_price_5 * book[,1])
 
 # Compute the P&L
